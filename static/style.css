@@ -394,6 +394,72 @@ button:disabled {
     margin-bottom: 8px;
 }
 
+/* Lyrics toggle switch */
+.lyrics-toggle {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.lyrics-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.lyrics-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #667eea;
+    border-radius: 26px;
+    transition: background 0.3s;
+}
+
+.lyrics-toggle-slider::before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.lyrics-toggle input:checked + .lyrics-toggle-slider {
+    background: #87ceeb;
+}
+
+.lyrics-toggle input:checked + .lyrics-toggle-slider::before {
+    transform: translateX(22px);
+}
+
+.lyrics-toggle-label {
+    font-size: 0.9em;
+    color: #999;
+    font-weight: 500;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+.lyrics-toggle-label.active {
+    color: #333;
+    font-weight: 700;
+}
+
+/* Original lyrics (non-selectable) */
+.lyric-line.lyric-original {
+    cursor: default;
+}
+
+.lyric-line.lyric-original:hover {
+    background: transparent;
+}
+
 .loading {
     display: inline-block;
     width: 20px;

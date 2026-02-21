@@ -131,6 +131,15 @@
                 <div id="audioLoading" style="text-align: center; color: #999; font-size: 0.85em; margin-top: 8px;">Loading audio...</div>
             </div>
             
+            <!-- Lyrics Toggle + Display -->
+            <div id="lyricsToggleBar" style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px;">
+                <span id="toggleLabelParody" class="lyrics-toggle-label active">🎤 Parody Lyrics</span>
+                <label class="lyrics-toggle">
+                    <input type="checkbox" id="lyricsSwitch" onchange="toggleLyricsView()">
+                    <span class="lyrics-toggle-slider"></span>
+                </label>
+                <span id="toggleLabelOriginal" class="lyrics-toggle-label">🎵 Original Lyrics</span>
+            </div>
             <div id="parodyLyricsDisplay" class="lyrics-display"></div>
 
             <!-- Explain Selected Lines Panel -->
@@ -580,6 +589,51 @@
             }
         }
 
+        // Track which lyrics view is active: 'parody' or 'original'
+        let currentLyricsView = 'parody';
+
+        function toggleLyricsView() {
+            const isOriginal = document.getElementById('lyricsSwitch').checked;
+            currentLyricsView = isOriginal ? 'original' : 'parody';
+
+            // Update toggle label styles
+            document.getElementById('toggleLabelParody').classList.toggle('active', !isOriginal);
+            document.getElementById('toggleLabelOriginal').classList.toggle('active', isOriginal);
+
+            // Clear line selections when switching
+            selectedLineIndices = new Set();
+            document.getElementById('explainPanel').style.display = 'none';
+
+            if (isOriginal) {
+                renderOriginalLyrics(state.songLyrics);
+            } else {
+                renderParodyLyrics(state.parodyLyrics);
+            }
+        }
+
+        // Render original lyrics (read-only, no line selection)
+        function renderOriginalLyrics(lyrics) {
+            const container = document.getElementById('parodyLyricsDisplay');
+            container.innerHTML = '';
+            const lines = lyrics.split('\n');
+            lines.forEach((line) => {
+                const lineEl = document.createElement('div');
+                lineEl.className = 'lyric-line lyric-original';
+                if (line.trim() === '') {
+                    lineEl.classList.add('lyric-spacer');
+                    lineEl.innerHTML = '&nbsp;';
+                } else {
+                    lineEl.textContent = line;
+                }
+                container.appendChild(lineEl);
+            });
+            // Add a note at the top
+            const hint = document.createElement('div');
+            hint.className = 'lyrics-hint';
+            hint.textContent = '🎵 Original lyrics — switch back to parody to select lines and get explanations.';
+            container.insertBefore(hint, container.firstChild);
+        }
+
         // Render parody lyrics as selectable lines
         function renderParodyLyrics(lyrics) {
             const container = document.getElementById('parodyLyricsDisplay');
@@ -731,6 +785,10 @@
             document.getElementById('explainPanel').style.display = 'none';
             document.getElementById('explainResult').style.display = 'none';
             selectedLineIndices = new Set();
+            currentLyricsView = 'parody';
+            document.getElementById('lyricsSwitch').checked = false;
+            document.getElementById('toggleLabelParody').classList.add('active');
+            document.getElementById('toggleLabelOriginal').classList.remove('active');
 
             showStep(1);
         }
