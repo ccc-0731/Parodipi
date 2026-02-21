@@ -6,3 +6,5 @@ pandas
 PyPDF2
 pymupdf
 textstat
+yt_dlp
+beautifulsoup4
