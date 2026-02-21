@@ -5,7 +5,10 @@ import re
 import urllib.parse
 import requests as http_requests
 from gemini_call import call_gemini_text
-from song_database import search_songs, get_song_lyrics
+from song_database import search_songs, get_song_lyrics, get_random_song
+
+# Import focus mapping function
+from focus_mapping import get_focus_prompt
 
 app = Flask(__name__)
 
@@ -47,10 +50,9 @@ def extract_text_from_pdf(pdf_path):
         return ""
 
 def generate_topic_checklist(math_concept, level, focus_slider, pdf_context=""):
-    """
-    Use Gemini to generate a structured list of topics/terms for the math concept.
-    focus_slider: 0 = learning experience focus, 100 = teaching focus
-    """
+
+    # Use Gemini to generate a structured list of topics/terms for the math concept with focus_slider: 0 = learning experience focus, 100 = teaching focus
+    
     pdf_section = ""
     if pdf_context:
         pdf_section = f"""
@@ -68,15 +70,11 @@ def generate_topic_checklist(math_concept, level, focus_slider, pdf_context=""):
     else:
         concept_section = f'Generate a JSON response with a list of topics, terms, and key concepts related to the math concept "{math_concept}" at the {level} level.'
 
+    focus_string = get_focus_prompt(focus_slider)
     prompt = f"""
     {concept_section}
     
-    The focus should be on:
-    - If focus is closer to 0: Emphasize the journey and experience of learning this concept 
-    (e.g. It's hard to learn about eigenvalues, but you think about it in terms of transformations and it's super rewarding)
-    - If focus is closer to 50: Balance between learning experience and teaching
-    - If focus is closer to 100: Focus on clearly teaching and explaining the concept
-    (Do a-lambda*I and find the characteristic polynomial to find the eigenvalues)
+    {focus_string}
     
     Current focus level: {focus_slider}/100
     
@@ -104,9 +102,7 @@ def generate_topic_checklist(math_concept, level, focus_slider, pdf_context=""):
         return []
 
 def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, chosen_song, song_lyrics, pdf_context=""):
-    """
-    Use Gemini to generate the parody song lyrics.
-    """
+    #Use Gemini to generate the parody song lyrics.
     topics_str = ", ".join([t['name'] for t in selected_topics])
     
     # Build the subject description based on what's available
@@ -124,22 +120,28 @@ def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, c
     --- End PDF Content ---
     """
     
+    focus_string = get_focus_prompt(focus_slider)
     prompt = f"""
     You are a creative songwriter. Create a parody version of the following song that teaches about {subject}.
     
     Key concepts to include: {topics_str}
     {pdf_section}
+    {focus_string}
     Learning/Teaching focus (0=learning experience, 100=teaching): {focus_slider}/100
     
     Original song title: {chosen_song}
     Original song lyrics:
     {song_lyrics}
     
-    Create smart, humorous, and educational parody lyrics that:
-    1. Keep the same structure and rhyme scheme of the original
-    2. Replace words/phrases with math-related equivalents
-    3. {'Emphasize the emotional journey and wonder of learning' if focus_slider < 50 else 'Focus on clearly explaining the mathematical concepts' if focus_slider > 50 else 'Balance teaching with an engaging narrative'}
-    4. Make sure all selected topics are naturally woven in
+    You are rewriting song lyrics.
+
+    Process:
+
+    1. For each original line, compute syllable count.
+    2. Store the counts.
+    3. Write new lyrics with the SAME meaning structure and EXACT syllable counts.
+    4. For every generated line, show syllable breakdown.
+    5. Perform a final verification pass and fix mismatches.
     
     Return ONLY the parody lyrics, nothing else.
     """
@@ -148,6 +150,17 @@ def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, c
     return result['raw']
 
 # ============= ROUTES =============
+
+# --- Random Song API ---
+@app.route("/api/random-song", methods=["GET"])
+def random_song():
+    """
+    Returns a random song (title and artist) from the database.
+    """
+    song = get_random_song()
+    if not song:
+        return jsonify({"error": "No songs available"}), 404
+    return jsonify(song)
 
 @app.route("/")
 def index():

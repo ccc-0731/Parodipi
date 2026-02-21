@@ -43,6 +43,14 @@ def get_song_lyrics(song_title):
         return song_row.iloc[0]['lyrics']
     return None
 
+# --- Random Song Selection ---
+import random
+def get_random_song():
+    if songs_df is None or songs_df.empty:
+        return None
+    row = songs_df.sample(1).iloc[0]
+    return {"title": row['song'], "artist": row['artist']}
+
 SONGS_CSV_PATH = os.getenv('SONGS_CSV_PATH', 'songs.csv')
 songs_df = load_songs_from_csv(SONGS_CSV_PATH)
 songs_df = clean_song_lyrics(songs_df)

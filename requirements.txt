@@ -5,3 +5,4 @@ requests
 pandas
 PyPDF2
 pymupdf
+textstat
