@@ -2,3 +2,5 @@ google-genai
 python-dotenv
 flask
 requests
+PyPDF2
+pymupdf
