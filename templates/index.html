@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Parody Song Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #764ba2;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .step {
+            margin-bottom: 40px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .step.hidden {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            background: #ddd;
+            outline: none;
+            border-radius: 5px;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #667eea;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .slider-value {
+            min-width: 30px;
+            text-align: right;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .topic-checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .topic-item {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            background: white;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+
+        .topic-item:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .topic-item input[type="checkbox"] {
+            margin-top: 4px;
+            cursor: pointer;
+        }
+
+        .topic-info {
+            flex: 1;
+        }
+
+        .topic-info label {
+            margin: 0;
+            font-weight: 600;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .topic-description {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .custom-topic-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .custom-topic-input input {
+            flex: 1;
+        }
+
+        .custom-topic-input button {
+            padding: 12px 20px;
+        }
+
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .song-result {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .song-result:hover {
+            background-color: #f0f4ff;
+        }
+
+        .song-result:last-child {
+            border-bottom: none;
+        }
+
+        .song-result.selected {
+            background-color: #667eea;
+            color: white;
+            border-radius: 6px;
+            border-bottom: 1px solid #667eea;
+        }
+
+        .lyrics-display {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            line-height: 1.8;
+            max-height: 400px;
+            overflow-y: auto;
+            color: #333;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            color: #388e3c;
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .step-counter {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .buttons-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+
+        button.secondary {
+            background: #ddd;
+            color: #333;
+        }
+
+        button.secondary:hover {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Math Parody Song Generator</h1>
+
+        <!-- STEP 1: Math Concept & Settings -->
+        <div class="step" id="step1">
+            <h2><span class="step-counter">1</span>Choose Your Math Concept</h2>
+            
+            <div class="form-group">
+                <label for="mathConcept">What math concept do you want to parodize?</label>
+                <input type="text" id="mathConcept" placeholder="e.g., Calculus, Linear Algebra, Quadratic Equations..." required>
+            </div>
+
+            <div class="form-group">
+                <label for="level">Math Level</label>
+                <select id="level">
+                    <option value="high school">High School</option>
+                    <option value="undergraduate">Undergraduate</option>
+                    <option value="advanced">Advanced/Graduate</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Learning Experience vs. Teaching Focus</label>
+                <div class="slider-labels">
+                    <span>Learning Journey</span>
+                    <span>Teaching Focus</span>
+                </div>
+                <div class="slider-container">
+                    <input type="range" id="focusSlider" min="0" max="100" value="50">
+                    <div class="slider-value" id="sliderValue">50</div>
+                </div>
+            </div>
+
+            <button onclick="generateTopics()">Generate Topic Checklist</button>
+            <div id="step1-message"></div>
+        </div>
+
+        <!-- STEP 2: Topic Selection -->
+        <div class="step hidden" id="step2">
+            <h2><span class="step-counter">2</span>Select Topics to Include</h2>
+            
+            <p style="color: #666; margin-bottom: 15px;">Select the concepts you want in your song:</p>
+            <div class="topic-checklist" id="topicChecklist"></div>
+
+            <div class="custom-topic-input">
+                <input type="text" id="customTopic" placeholder="Add your own topic...">
+                <button onclick="addCustomTopic()">Add Topic</button>
+            </div>
+
+            <button onclick="proceedToSongSearch()">Find a Song to Parody</button>
+            <div id="step2-message"></div>
+        </div>
+
+        <!-- STEP 3: Song Search -->
+        <div class="step hidden" id="step3">
+            <h2><span class="step-counter">3</span>Choose a Song</h2>
+            
+            <div class="form-group">
+                <label for="songSearch">Search for a song to parody:</label>
+                <input type="text" id="songSearch" placeholder="e.g., Bohemian Rhapsody, Imagine, Hey Jude..." oninput="searchSongs()">
+            </div>
+
+            <div id="searchResults" class="search-results hidden">
+                <p style="text-align: center; color: #999;">Search results will appear here...</p>
+            </div>
+
+            <div id="selectedSongDisplay" style="margin-top: 20px;"></div>
+
+            <button id="proceedToLyricsBtn" onclick="proceedToLyricsGeneration()" disabled>Generate Parody</button>
+            <div id="step3-message"></div>
+        </div>
+
+        <!-- STEP 4: Display Parody Lyrics -->
+        <div class="step hidden" id="step4">
+            <h2><span class="step-counter">4</span>Your Math Parody Song</h2>
+            
+            <div id="songTitleDisplay" style="font-size: 1.3em; font-weight: bold; color: #667eea; margin-bottom: 15px;"></div>
+            <div id="parodyLyricsDisplay" class="lyrics-display"></div>
+
+            <button onclick="startOver()">Start Over</button>
+            <button class="secondary" onclick="copySongToClipboard()">Copy Lyrics</button>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let state = {
+            mathConcept: '',
+            level: 'high school',
+            focusSlider: 50,
+            topics: [],
+            selectedTopics: [],
+            chosenSong: '',
+            songLyrics: '',
+            parodyLyrics: ''
+        };
+
+        // Update slider value display
+        document.getElementById('focusSlider').addEventListener('input', (e) => {
+            document.getElementById('sliderValue').textContent = e.target.value;
+            state.focusSlider = parseInt(e.target.value);
+        });
+
+        // Step 1: Generate Topics
+        async function generateTopics() {
+            const mathConcept = document.getElementById('mathConcept').value.trim();
+            
+            if (!mathConcept) {
+                showMessage('step1-message', 'Please enter a math concept', 'error');
+                return;
+            }
+
+            state.mathConcept = mathConcept;
+            state.level = document.getElementById('level').value;
+            state.focusSlider = parseInt(document.getElementById('focusSlider').value);
+
+            showMessage('step1-message', 'Generating topics...', 'info');
+
+            try {
+                const response = await fetch('/api/generate-topics', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mathConcept: state.mathConcept,
+                        level: state.level,
+                        focusSlider: state.focusSlider
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate topics');
+                }
+
+                const data = await response.json();
+                state.topics = data.topics;
+                renderTopicChecklist();
+                showStep(2);
+                document.getElementById('step1-message').innerHTML = '';
+            } catch (error) {
+                showMessage('step1-message', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        // Render topic checklist
+        function renderTopicChecklist() {
+            const container = document.getElementById('topicChecklist');
+            container.innerHTML = '';
+
+            state.topics.forEach((topic, index) => {
+                const div = document.createElement('div');
+                div.className = 'topic-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="topic-${index}" checked onchange="updateSelectedTopics()">
+                    <div class="topic-info">
+                        <label for="topic-${index}">${topic.name}</label>
+                        <div class="topic-description">${topic.description || ''}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            updateSelectedTopics();
+        }
+
+        // Update selected topics
+        function updateSelectedTopics() {
+            state.selectedTopics = [];
+            document.querySelectorAll('#topicChecklist input[type="checkbox"]').forEach((checkbox, index) => {
+                if (checkbox.checked) {
+                    state.selectedTopics.push(state.topics[index]);
+                }
+            });
+        }
+
+        // Add custom topic
+        function addCustomTopic() {
+            const input = document.getElementById('customTopic');
+            const topic = input.value.trim();
+
+            if (!topic) {
+                showMessage('step2-message', 'Please enter a topic', 'error');
+                return;
+            }
+
+            const newTopic = {
+                id: state.topics.length,
+                name: topic,
+                description: 'Custom topic',
+                selected: true
+            };
+
+            state.topics.push(newTopic);
+            state.selectedTopics.push(newTopic);
+            input.value = '';
+            renderTopicChecklist();
+        }
+
+        // Proceed to song search
+        function proceedToSongSearch() {
+            if (state.selectedTopics.length === 0) {
+                showMessage('step2-message', 'Please select at least one topic', 'error');
+                return;
+            }
+            showStep(3);
+        }
+
+        // Search songs
+        async function searchSongs() {
+            const query = document.getElementById('songSearch').value.trim();
+
+            if (query.length < 2) {
+                document.getElementById('searchResults').classList.add('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/search-songs?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                displaySearchResults(data.songs || []);
+            } catch (error) {
+                showMessage('step3-message', 'Error searching songs: ' + error.message, 'error');
+            }
+        }
+
+        // Display search results
+        function displaySearchResults(songs) {
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '';
+
+            if (songs.length === 0) {
+                resultsDiv.innerHTML = '<p style="text-align: center; color: #999;">No songs found</p>';
+                resultsDiv.classList.remove('hidden');
+                return;
+            }
+
+            songs.forEach(song => {
+                const div = document.createElement('div');
+                div.className = 'song-result';
+                div.textContent = `${song.title} - ${song.artist || 'Unknown Artist'}`;
+                div.onclick = () => selectSong(song.title, song.artist);
+                resultsDiv.appendChild(div);
+            });
+
+            resultsDiv.classList.remove('hidden');
+        }
+
+        // Select a song
+        async function selectSong(title, artist) {
+            state.chosenSong = title;
+            
+            try {
+                const response = await fetch(`/api/get-song-lyrics?title=${encodeURIComponent(title)}`);
+                const data = await response.json();
+                state.songLyrics = data.lyrics;
+
+                const display = document.getElementById('selectedSongDisplay');
+                display.innerHTML = `
+                    <div class="success">
+                        Selected: <strong>${title}</strong> by ${artist}
+                    </div>
+                `;
+
+                document.getElementById('proceedToLyricsBtn').disabled = false;
+                document.getElementById('searchResults').classList.add('hidden');
+            } catch (error) {
+                showMessage('step3-message', 'Error fetching song lyrics: ' + error.message, 'error');
+            }
+        }
+
+        // Generate parody
+        async function proceedToLyricsGeneration() {
+            if (!state.chosenSong || !state.songLyrics) {
+                showMessage('step3-message', 'Please select a song first', 'error');
+                return;
+            }
+
+            showMessage('step3-message', 'Generating your parody song...');
+
+            try {
+                const response = await fetch('/api/generate-parody', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mathConcept: state.mathConcept,
+                        level: state.level,
+                        focusSlider: state.focusSlider,
+                        selectedTopics: state.selectedTopics,
+                        chosenSong: state.chosenSong,
+                        songLyrics: state.songLyrics
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to generate parody');
+                }
+
+                const data = await response.json();
+                state.parodyLyrics = data.parodyLyrics;
+
+                document.getElementById('songTitleDisplay').textContent = `🎵 ${state.chosenSong} (Math Parody)`;
+                document.getElementById('parodyLyricsDisplay').textContent = state.parodyLyrics;
+
+                showStep(4);
+                document.getElementById('step3-message').innerHTML = '';
+            } catch (error) {
+                showMessage('step3-message', 'Error generating parody: ' + error.message, 'error');
+            }
+        }
+
+        // Start over
+        function startOver() {
+            state = {
+                mathConcept: '',
+                level: 'high school',
+                focusSlider: 50,
+                topics: [],
+                selectedTopics: [],
+                chosenSong: '',
+                songLyrics: '',
+                parodyLyrics: ''
+            };
+
+            document.getElementById('mathConcept').value = '';
+            document.getElementById('focusSlider').value = 50;
+            document.getElementById('sliderValue').textContent = '50';
+            document.getElementById('songSearch').value = '';
+            document.getElementById('selectedSongDisplay').innerHTML = '';
+            document.getElementById('proceedToLyricsBtn').disabled = true;
+
+            showStep(1);
+        }
+
+        // Copy to clipboard
+        function copySongToClipboard() {
+            navigator.clipboard.writeText(state.parodyLyrics).then(() => {
+                alert('Lyrics copied to clipboard!');
+            });
+        }
+
+        // UI Helpers
+        function showStep(stepNumber) {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step${i}`).classList.add('hidden');
+            }
+            document.getElementById(`step${stepNumber}`).classList.remove('hidden');
+        }
+
+        function showMessage(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const classMap = { info: '', error: 'error', success: 'success' };
+            element.innerHTML = `<div class="${classMap[type]}">${message}</div>`;
+        }
+
+        // Initialize
+        showStep(1);
+    </script>
+</body>
+</html>
