@@ -1,3 +1,73 @@
+/* Hover notes for slider labels */
+.hover-note {
+    position: relative;
+    cursor: pointer;
+}
+.note-text {
+    display: none;
+    position: absolute;
+    top: 120%;
+    background: #fffbe7;
+    color: #333;
+    border: 1px solid #e0c97f;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.95em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    z-index: 10;
+    width: 260px;
+    max-width: 90vw;
+    word-break: break-word;
+
+
+}
+
+/* Show note-text on hover */
+.hover-note:hover .note-text {
+    display: block;
+}
+
+#learningJourney .note-text {
+    left: 0;
+    right: auto;
+}
+
+#teachingFocus .note-text {
+    right: 0;
+    left: auto;
+    text-align: right;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+        max-width: 100vw;
+        min-width: 0;
+    }
+    .step {
+        padding: 10px;
+        margin-bottom: 20px;
+    }
+    h1 {
+        font-size: 1.5em;
+    }
+    h2 {
+        font-size: 1.1em;
+    }
+    #teachingFocus .note-text,
+    #learningJourney .note-text {
+        width: 90vw;
+        left: 0;
+        right: auto;
+        top: 110%;
+    }
+    .slider-labels {
+        flex-direction: column;
+        gap: 8px;
+        }
+}
+/* Remove duplicate selector, keep only correct one */
 .toggle-switch {
     display: inline-flex;
     align-items: center;
