@@ -101,6 +101,34 @@
             <h2><span class="step-counter">4</span>Your Math Parody Song</h2>
             
             <div id="songTitleDisplay" style="font-size: 1.3em; font-weight: bold; color: #667eea; margin-bottom: 15px;"></div>
+            
+            <div id="originalVideoSection" style="margin-bottom: 20px; display: none;">
+                <h3 style="color: #888; font-size: 0.95em; margin-bottom: 10px;">🎬 Original Song</h3>
+                <div id="videoContainer" style="width: 100%; max-width: 560px; margin: 0 auto;">
+                    <!-- Thumbnail fallback (always works) -->
+                    <div id="videoThumbnail" style="display: none; position: relative; cursor: pointer; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+                        <img id="videoThumbImg" style="width: 100%; display: block; border-radius: 12px;" alt="Video thumbnail">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 68px; height: 48px; background: rgba(255,0,0,0.85); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                            <div style="width: 0; height: 0; border-style: solid; border-width: 10px 0 10px 18px; border-color: transparent transparent transparent #fff; margin-left: 3px;"></div>
+                        </div>
+                    </div>
+                    <!-- Iframe embed (used when embedding is allowed) -->
+                    <div id="videoIframeWrap" style="display: none; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+                        <iframe id="youtubeEmbed" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Audio Player Section -->
+            <div id="audioPlayerSection" style="margin-bottom: 20px; display: none;">
+                <h3 style="color: #888; font-size: 0.95em; margin-bottom: 10px;">🎧 Listen to Original</h3>
+                <div style="width: 100%; max-width: 560px; margin: 0 auto; background: #1a1a2e; border-radius: 12px; padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+                    <div id="audioTitle" style="color: #ccc; font-size: 0.85em; margin-bottom: 10px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                    <audio id="audioPlayer" controls style="width: 100%; border-radius: 8px; outline: none;"></audio>
+                </div>
+                <div id="audioLoading" style="text-align: center; color: #999; font-size: 0.85em; margin-top: 8px;">Loading audio...</div>
+            </div>
+            
             <div id="parodyLyricsDisplay" class="lyrics-display"></div>
 
             <button onclick="startOver()">Start Over</button>
@@ -117,6 +145,7 @@
             topics: [],
             selectedTopics: [],
             chosenSong: '',
+            chosenArtist: '',
             songLyrics: '',
             parodyLyrics: '',
             searchMode: 'title', // default mode
@@ -304,6 +333,7 @@
         // Select a song
         async function selectSong(title, artist) {
             state.chosenSong = title;
+            state.chosenArtist = artist || '';
             
             try {
                 const response = await fetch(`/api/get-song-lyrics?title=${encodeURIComponent(title)}`);
@@ -331,37 +361,143 @@
                 return;
             }
 
-            showMessage('step3-message', 'Generating your parody song...');
+            showMessage('step3-message', 'Generating your parody song and finding the original video...');
 
             try {
-                const response = await fetch('/api/generate-parody', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        mathConcept: state.mathConcept,
-                        level: state.level,
-                        focusSlider: state.focusSlider,
-                        selectedTopics: state.selectedTopics,
-                        chosenSong: state.chosenSong,
-                        songLyrics: state.songLyrics,
-                        pdfContext: state.pdfContext || ''
-                    })
-                });
+                // Fetch parody lyrics and YouTube video in parallel
+                const [parodyResponse, videoResponse] = await Promise.all([
+                    fetch('/api/generate-parody', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            mathConcept: state.mathConcept,
+                            level: state.level,
+                            focusSlider: state.focusSlider,
+                            selectedTopics: state.selectedTopics,
+                            chosenSong: state.chosenSong,
+                            songLyrics: state.songLyrics,
+                            pdfContext: state.pdfContext || ''
+                        })
+                    }),
+                    fetch(`/api/youtube-search?title=${encodeURIComponent(state.chosenSong)}&artist=${encodeURIComponent(state.chosenArtist || '')}`)
+                ]);
 
-                if (!response.ok) {
+                if (!parodyResponse.ok) {
                     throw new Error('Failed to generate parody');
                 }
 
-                const data = await response.json();
-                state.parodyLyrics = data.parodyLyrics;
+                const parodyData = await parodyResponse.json();
+                state.parodyLyrics = parodyData.parodyLyrics;
 
                 document.getElementById('songTitleDisplay').textContent = `🎵 ${state.chosenSong} (Math Parody)`;
                 document.getElementById('parodyLyricsDisplay').textContent = state.parodyLyrics;
+
+                // Handle YouTube video embed
+                const videoSection = document.getElementById('originalVideoSection');
+                try {
+                    if (videoResponse.ok) {
+                        const videoData = await videoResponse.json();
+                        console.log('[YouTube] Response:', videoData);
+                        if (videoData.videos && videoData.videos.length > 0) {
+                            const videos = videoData.videos;
+                            showYouTubeVideo(videos);
+                            videoSection.style.display = 'block';
+                        } else {
+                            console.log('[YouTube] No videos returned');
+                            videoSection.style.display = 'none';
+                        }
+                    } else {
+                        console.log('[YouTube] Response not OK:', videoResponse.status);
+                        videoSection.style.display = 'none';
+                    }
+                } catch (videoErr) {
+                    console.log('[YouTube] Error handling video:', videoErr);
+                    videoSection.style.display = 'none';
+                }
 
                 showStep(4);
                 document.getElementById('step3-message').innerHTML = '';
             } catch (error) {
                 showMessage('step3-message', 'Error generating parody: ' + error.message, 'error');
+            }
+        }
+
+        // Show YouTube video — uses clickable thumbnail that loads embed on click
+        function showYouTubeVideo(videos) {
+            const iframeWrap = document.getElementById('videoIframeWrap');
+            const thumbWrap = document.getElementById('videoThumbnail');
+            const iframe = document.getElementById('youtubeEmbed');
+            const thumbImg = document.getElementById('videoThumbImg');
+
+            // Hide both initially
+            iframeWrap.style.display = 'none';
+            thumbWrap.style.display = 'none';
+
+            const video = videos[0];
+            const watchUrl = video.watchUrl;
+            const videoId = video.videoId;
+
+            // Show the thumbnail as the primary display (always works)
+            thumbImg.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+            thumbWrap.style.display = 'block';
+
+            // When thumbnail is clicked, replace it with the embedded player
+            thumbWrap.onclick = () => {
+                const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+                iframe.src = embedUrl;
+                thumbWrap.style.display = 'none';
+                iframeWrap.style.display = 'block';
+            };
+
+            // Add a "Watch on YouTube" link below
+            const container = document.getElementById('videoContainer');
+            const existingLink = container.querySelector('.watch-on-yt');
+            if (existingLink) existingLink.remove();
+
+            const link = document.createElement('a');
+            link.className = 'watch-on-yt';
+            link.href = watchUrl;
+            link.target = '_blank';
+            link.style.cssText = 'display: block; text-align: center; margin-top: 8px; color: #667eea; font-size: 0.85em; text-decoration: none;';
+            link.textContent = '▶ Watch on YouTube';
+            container.appendChild(link);
+
+            // Fetch audio stream for the audio player
+            loadAudioPlayer(videoId);
+        }
+
+        // Load audio player from YouTube video
+        async function loadAudioPlayer(videoId) {
+            const section = document.getElementById('audioPlayerSection');
+            const loading = document.getElementById('audioLoading');
+            const player = document.getElementById('audioPlayer');
+            const titleEl = document.getElementById('audioTitle');
+
+            // Show section with loading state
+            section.style.display = 'block';
+            loading.style.display = 'block';
+            loading.textContent = 'Loading audio...';
+            player.style.display = 'none';
+            titleEl.textContent = '';
+
+            try {
+                const resp = await fetch(`/api/youtube-audio?videoId=${encodeURIComponent(videoId)}`);
+                const data = await resp.json();
+                console.log('[Audio] Response:', data);
+
+                if (data.audioUrl) {
+                    player.src = data.audioUrl;
+                    player.style.display = 'block';
+                    loading.style.display = 'none';
+                    if (data.title) {
+                        titleEl.textContent = data.title;
+                    }
+                } else {
+                    loading.textContent = 'Audio not available';
+                }
+            } catch (err) {
+                console.log('[Audio] Error:', err);
+                loading.textContent = 'Could not load audio';
             }
         }
 
@@ -374,6 +510,7 @@
                 topics: [],
                 selectedTopics: [],
                 chosenSong: '',
+                chosenArtist: '',
                 songLyrics: '',
                 parodyLyrics: '',
                 pdfContext: ''
@@ -387,6 +524,15 @@
             document.getElementById('proceedToLyricsBtn').disabled = true;
             document.getElementById('pdfUpload').value = '';
             document.getElementById('pdfStatus').innerHTML = '';
+            document.getElementById('originalVideoSection').style.display = 'none';
+            document.getElementById('youtubeEmbed').src = '';
+            document.getElementById('videoIframeWrap').style.display = 'none';
+            document.getElementById('videoThumbnail').style.display = 'none';
+            const watchLink = document.querySelector('.watch-on-yt');
+            if (watchLink) watchLink.remove();
+            document.getElementById('audioPlayerSection').style.display = 'none';
+            document.getElementById('audioPlayer').src = '';
+            document.getElementById('audioPlayer').pause();
 
             showStep(1);
         }

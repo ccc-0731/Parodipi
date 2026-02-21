@@ -1,6 +1,9 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, Response
 import json
 import os
+import re
+import urllib.parse
+import requests as http_requests
 from gemini_call import call_gemini_text
 from song_database import search_songs, get_song_lyrics
 
@@ -254,6 +257,152 @@ def generate_parody():
     parody_lyrics = generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, chosen_song, song_lyrics, pdf_context)
     
     return jsonify({"parodyLyrics": parody_lyrics})
+
+@app.route("/api/youtube-search", methods=["GET"])
+def youtube_search():
+    """
+    Search YouTube for the original song video.
+    Scrapes the first video ID from YouTube search results — no API key needed.
+    """
+    song_title = request.args.get('title', '')
+    artist = request.args.get('artist', '')
+
+    if not song_title:
+        return jsonify({"error": "Song title is required"}), 400
+
+    query = f"{song_title} {artist} official music video".strip()
+    print(f"[DEBUG] YouTube search query: {query}")
+
+    try:
+        # Search YouTube and scrape video IDs from the HTML response
+        search_url = "https://www.youtube.com/results?" + urllib.parse.urlencode({"search_query": query})
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+        resp = http_requests.get(search_url, headers=headers, timeout=10)
+        resp.raise_for_status()
+
+        # Extract video IDs from the page — they appear as "videoId":"XXXXXXXXXXX"
+        video_ids = re.findall(r'"videoId":"([a-zA-Z0-9_-]{11})"', resp.text)
+
+        # Deduplicate while preserving order
+        seen = set()
+        unique_ids = []
+        for vid in video_ids:
+            if vid not in seen:
+                seen.add(vid)
+                unique_ids.append(vid)
+            if len(unique_ids) >= 3:
+                break
+
+        print(f"[DEBUG] Found video IDs: {unique_ids}")
+
+        embed_urls = []
+        for video_id in unique_ids:
+            embed_urls.append({
+                "videoId": video_id,
+                "embedUrl": f"https://www.youtube.com/embed/{video_id}",
+                "watchUrl": f"https://www.youtube.com/watch?v={video_id}"
+            })
+
+        return jsonify({"videos": embed_urls})
+    except Exception as e:
+        print(f"[DEBUG] YouTube search error: {e}")
+        return jsonify({"error": str(e), "videos": []}), 200
+
+
+@app.route("/api/youtube-audio", methods=["GET"])
+def youtube_audio():
+    """
+    Extract the audio stream URL from a YouTube video using yt-dlp.
+    Returns a proxied URL that the browser <audio> element can play.
+    """
+    video_id = request.args.get('videoId', '')
+    if not video_id or len(video_id) != 11:
+        return jsonify({"error": "Valid videoId is required"}), 400
+
+    try:
+        import yt_dlp
+
+        url = f"https://www.youtube.com/watch?v={video_id}"
+        ydl_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'format': 'bestaudio[ext=m4a]/bestaudio/best',
+            'skip_download': True,
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            audio_url = info.get('url')
+            title = info.get('title', '')
+            duration = info.get('duration', 0)
+
+        if not audio_url:
+            return jsonify({"error": "Could not extract audio URL"}), 404
+
+        print(f"[DEBUG] Extracted audio for '{title}' ({duration}s)")
+
+        # Store the direct URL in a simple cache so the proxy can use it
+        _audio_cache[video_id] = audio_url
+
+        return jsonify({
+            "audioUrl": f"/api/youtube-audio-stream?videoId={video_id}",
+            "title": title,
+            "duration": duration
+        })
+
+    except Exception as e:
+        print(f"[DEBUG] YouTube audio extraction error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# Simple in-memory cache for audio URLs (videoId -> direct URL)
+_audio_cache = {}
+
+
+@app.route("/api/youtube-audio-stream", methods=["GET"])
+def youtube_audio_stream():
+    """
+    Proxy the YouTube audio stream through our server to avoid CORS issues.
+    """
+    video_id = request.args.get('videoId', '')
+    audio_url = _audio_cache.get(video_id)
+
+    if not audio_url:
+        return "Audio not found — please request /api/youtube-audio first", 404
+
+    try:
+        # Stream the audio from YouTube through our server
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        }
+
+        # Forward range requests for seeking support
+        if 'Range' in request.headers:
+            headers['Range'] = request.headers['Range']
+
+        resp = http_requests.get(audio_url, headers=headers, stream=True, timeout=30)
+
+        def generate():
+            for chunk in resp.iter_content(chunk_size=8192):
+                yield chunk
+
+        response_headers = {
+            'Content-Type': resp.headers.get('Content-Type', 'audio/mp4'),
+            'Accept-Ranges': 'bytes',
+        }
+        if 'Content-Length' in resp.headers:
+            response_headers['Content-Length'] = resp.headers['Content-Length']
+        if 'Content-Range' in resp.headers:
+            response_headers['Content-Range'] = resp.headers['Content-Range']
+
+        return Response(generate(), status=resp.status_code, headers=response_headers)
+
+    except Exception as e:
+        print(f"[DEBUG] Audio stream proxy error: {e}")
+        return f"Error streaming audio: {e}", 500
 
 
 if __name__ == '__main__':
