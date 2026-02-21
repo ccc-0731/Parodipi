@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 import json
 from gemini_call import call_gemini_text
-from song_database import get_song_by_title, search_songs_by_title, get_song_lyrics
+from song_database import search_songs, get_song_lyrics
 
 app = Flask(__name__)
 
@@ -16,9 +16,11 @@ def generate_topic_checklist(math_concept, level, focus_slider):
     Generate a JSON response with a list of topics, terms, and key concepts related to the math concept "{math_concept}" at the {level} level.
     
     The focus should be on:
-    - If focus is closer to 0: Emphasize the journey and experience of learning this concept
+    - If focus is closer to 0: Emphasize the journey and experience of learning this concept 
+    (e.g. It's hard to learn about eigenvalues, but you think about it in terms of transformations and it's super rewarding)
     - If focus is closer to 50: Balance between learning experience and teaching
     - If focus is closer to 100: Focus on clearly teaching and explaining the concept
+    (Do a-lambda*I and find the characteristic polynomial to find the eigenvalues)
     
     Current focus level: {focus_slider}/100
     
@@ -103,17 +105,17 @@ def generate_topics():
     })
 
 @app.route("/api/search-songs", methods=["GET"])
-def search_songs():
+def search_songs_route():
     """
     Step 2: Search for songs in our database.
     """
     query = request.args.get('q', '')
+    mode = request.args.get('mode', 'title')  # 'title' or 'lyrics'
     
     if not query:
         return jsonify({"error": "Search query is required"}), 400
     
-    # Search in mock database (you can replace with real DB)
-    results = search_songs_by_title(query)
+    results = search_songs(query, mode=mode)
     
     return jsonify({"songs": results})
 

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Math Parody Song Generator</title>
+    <title>Parodipi</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
-        <h1>🎵 Math Parody Song Generator</h1>
+        <h1>🎵 Parodipi </h1>
 
         <!-- STEP 1: Math Concept & Settings -->
         <div class="step" id="step1">
@@ -66,7 +66,13 @@
             
             <div class="form-group">
                 <label for="songSearch">Search for a song to parody:</label>
-                <input type="text" id="songSearch" placeholder="e.g., Bohemian Rhapsody, Imagine, Hey Jude..." oninput="searchSongs()">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="text" id="songSearch" placeholder="e.g., I want it that way, Try everything, ..." oninput="searchSongs()">
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="modeSwitch" checked onchange="toggleSearchMode()">
+                        <label for="modeSwitch" id="modeSwitchLabel">Title</label>
+                    </div>
+                </div>
             </div>
 
             <div id="searchResults" class="search-results hidden">
@@ -101,7 +107,8 @@
             selectedTopics: [],
             chosenSong: '',
             songLyrics: '',
-            parodyLyrics: ''
+            parodyLyrics: '',
+            searchMode: 'title' // default mode
         };
 
         // Update slider value display
@@ -216,6 +223,7 @@
         // Search songs
         async function searchSongs() {
             const query = document.getElementById('songSearch').value.trim();
+            const mode = state.searchMode;
 
             if (query.length < 2) {
                 document.getElementById('searchResults').classList.add('hidden');
@@ -223,12 +231,26 @@
             }
 
             try {
-                const response = await fetch(`/api/search-songs?q=${encodeURIComponent(query)}`);
+                const response = await fetch(`/api/search-songs?q=${encodeURIComponent(query)}&mode=${mode}`);
                 const data = await response.json();
                 displaySearchResults(data.songs || []);
             } catch (error) {
                 showMessage('step3-message', 'Error searching songs: ' + error.message, 'error');
             }
+        }
+
+        // Toggle search mode
+        function toggleSearchMode() {
+            const switchElem = document.getElementById('modeSwitch');
+            const labelElem = document.getElementById('modeSwitchLabel');
+            if (switchElem.checked) {
+                state.searchMode = 'title';
+                labelElem.textContent = 'Title';
+            } else {
+                state.searchMode = 'lyrics';
+                labelElem.textContent = 'Lyrics';
+            }
+            searchSongs(); // re-search with new mode
         }
 
         // Display search results

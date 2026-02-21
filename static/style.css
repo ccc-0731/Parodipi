@@ -1,3 +1,42 @@
+.toggle-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.toggle-switch input[type="checkbox"] {
+    width: 40px;
+    height: 20px;
+    appearance: none;
+    background: #ccc;
+    border-radius: 20px;
+    position: relative;
+    outline: none;
+    transition: background 0.3s;
+    cursor: pointer;
+}
+.toggle-switch input[type="checkbox"]:checked {
+    background: #87ceeb;
+}
+.toggle-switch input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.3s;
+}
+.toggle-switch input[type="checkbox"]:checked::before {
+    left: 22px;
+}
+.toggle-switch label {
+    font-size: 1em;
+    color: #20b2aa;
+    font-weight: bold;
+    user-select: none;
+}
 /* Math Parody Song Generator Theme: Sky Blue, Sea Green, Sandy Yellow */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
