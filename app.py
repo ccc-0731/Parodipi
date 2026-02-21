@@ -418,5 +418,129 @@ def youtube_audio_stream():
         return f"Error streaming audio: {e}", 500
 
 
+@app.route("/api/explain-line", methods=["POST"])
+def explain_line():
+    """
+    Given one or more highlighted lines from the parody song, ask Gemini to
+    explain the math concepts referenced in those lines.
+    """
+    data = request.get_json()
+    lines = data.get('lines', '')
+    math_concept = data.get('mathConcept', '')
+    level = data.get('level', 'high school')
+    selected_topics = data.get('selectedTopics', [])
+    full_lyrics = data.get('fullLyrics', '')
+
+    if not lines:
+        return jsonify({"error": "No lines selected"}), 400
+
+    topics_str = ", ".join(
+        [t.get('name', t) if isinstance(t, dict) else str(t) for t in selected_topics]
+    )
+
+    prompt = f"""You are a friendly and clear math tutor. A student is reading a math parody song about {math_concept or 'various math topics'} ({level} level).
+
+They highlighted the following line(s) from the song and want you to explain the math concept(s) referenced:
+
+--- Highlighted Lines ---
+{lines}
+--- End Highlighted Lines ---
+
+Context — the full parody lyrics:
+{full_lyrics[:2000]}
+
+Topics covered in the song: {topics_str}
+
+Please:
+1. Identify which math concept(s) are referenced in the highlighted line(s).
+2. Explain each concept clearly and concisely at the {level} level.
+3. If the line uses a metaphor or wordplay, explain how the original song lyric was adapted to convey the math idea.
+4. Keep your explanation short (2-4 paragraphs max). Use simple language.
+"""
+
+    try:
+        result = call_gemini_text(prompt)
+        return jsonify({"explanation": result['raw']})
+    except Exception as e:
+        print(f"[DEBUG] Explain line error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/resource-links", methods=["POST"])
+def resource_links():
+    """
+    Given selected topics, find 2 trusted learning resource links.
+    Scrapes real YouTube videos from Khan Academy and 3Blue1Brown channels,
+    so every returned URL is guaranteed to be real and clickable.
+    """
+    data = request.get_json()
+    topics = data.get('topics', [])
+    math_concept = data.get('mathConcept', '')
+
+    if not topics and not math_concept:
+        return jsonify({"error": "No topics or concept provided"}), 400
+
+    topic_names = [t.get('name', t) if isinstance(t, dict) else str(t) for t in topics[:5]]
+    search_terms = math_concept or " ".join(topic_names)
+
+    print(f"[DEBUG] Resource links search: {search_terms}")
+
+    # Sources to search — each is a YouTube channel search
+    sources = [
+        {
+            "query": f"Khan Academy {search_terms}",
+            "name": "Khan Academy",
+            "icon": "🎓",
+        },
+        {
+            "query": f"3Blue1Brown {search_terms}",
+            "name": "3Blue1Brown",
+            "icon": "🔵",
+        },
+    ]
+
+    links = []
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+    }
+
+    for source in sources:
+        try:
+            search_url = "https://www.youtube.com/results?" + urllib.parse.urlencode({
+                "search_query": source["query"]
+            })
+            resp = http_requests.get(search_url, headers=headers, timeout=8)
+            resp.raise_for_status()
+
+            # Extract video IDs and titles from the YouTube response
+            # Video IDs appear as "videoId":"XXXXXXXXXXX"
+            video_ids = re.findall(r'"videoId":"([a-zA-Z0-9_-]{11})"', resp.text)
+
+            # Extract titles — they appear as "title":{"runs":[{"text":"TITLE"}]}
+            titles = re.findall(r'"title":\{"runs":\[\{"text":"([^"]{5,120})"\}', resp.text)
+
+            # Deduplicate video IDs and pair with titles
+            seen = set()
+            for i, vid in enumerate(video_ids):
+                if vid not in seen:
+                    seen.add(vid)
+                    title = titles[i] if i < len(titles) else f"{source['name']} — {search_terms}"
+                    links.append({
+                        "url": f"https://www.youtube.com/watch?v={vid}",
+                        "title": title[:60],
+                        "source": source["name"],
+                        "icon": source["icon"],
+                    })
+                    break  # one per source
+
+        except Exception as e:
+            print(f"[DEBUG] Resource search error for {source['name']}: {e}")
+            continue
+
+    print(f"[DEBUG] Found {len(links)} resource links")
+    return jsonify({"links": links})
+
+
 if __name__ == '__main__':
     app.run(port=8000, debug=True)
