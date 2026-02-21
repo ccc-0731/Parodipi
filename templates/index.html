@@ -16,7 +16,7 @@
             
             <div class="form-group">
                 <label for="mathConcept">What math concept do you want to parodize?</label>
-                <input type="text" id="mathConcept" placeholder="e.g., Calculus, Linear Algebra, Quadratic Equations..." required>
+                <input type="text" id="mathConcept" placeholder="e.g., Calculus, Linear Algebra, Quadratic Equations...">
             </div>
 
             <div class="form-group">
@@ -38,6 +38,13 @@
                     <input type="range" id="focusSlider" min="0" max="100" value="50">
                     <div class="slider-value" id="sliderValue">50</div>
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pdfUpload">Upload a PDF (optional if concept is entered)</label>
+                <p style="color: #888; font-size: 0.85em; margin-bottom: 8px;">Upload notes, a textbook chapter, or slides. If no math concept is entered, topics will be extracted from the PDF.</p>
+                <input type="file" id="pdfUpload" accept=".pdf">
+                <div id="pdfStatus"></div>
             </div>
 
             <button onclick="generateTopics()">Generate Topic Checklist</button>
@@ -108,7 +115,8 @@
             chosenSong: '',
             songLyrics: '',
             parodyLyrics: '',
-            searchMode: 'title' // default mode
+            searchMode: 'title', // default mode
+            pdfContext: ''
         };
 
         // Update slider value display
@@ -120,9 +128,10 @@
         // Step 1: Generate Topics
         async function generateTopics() {
             const mathConcept = document.getElementById('mathConcept').value.trim();
+            const pdfFile = document.getElementById('pdfUpload').files[0];
             
-            if (!mathConcept) {
-                showMessage('step1-message', 'Please enter a math concept', 'error');
+            if (!mathConcept && !pdfFile) {
+                showMessage('step1-message', 'Please enter a math concept or upload a PDF', 'error');
                 return;
             }
 
@@ -130,17 +139,27 @@
             state.level = document.getElementById('level').value;
             state.focusSlider = parseInt(document.getElementById('focusSlider').value);
 
-            showMessage('step1-message', 'Generating topics...', 'info');
+            if (pdfFile && !mathConcept) {
+                showMessage('step1-message', 'Uploading PDF and extracting topics...', 'info');
+            } else if (pdfFile && mathConcept) {
+                showMessage('step1-message', 'Uploading PDF and generating topics...', 'info');
+            } else {
+                showMessage('step1-message', 'Generating topics...', 'info');
+            }
 
             try {
+                const formData = new FormData();
+                formData.append('mathConcept', state.mathConcept);
+                formData.append('level', state.level);
+                formData.append('focusSlider', state.focusSlider);
+
+                if (pdfFile) {
+                    formData.append('pdf', pdfFile);
+                }
+
                 const response = await fetch('/api/generate-topics', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        mathConcept: state.mathConcept,
-                        level: state.level,
-                        focusSlider: state.focusSlider
-                    })
+                    body: formData
                 });
 
                 if (!response.ok) {
@@ -149,6 +168,9 @@
 
                 const data = await response.json();
                 state.topics = data.topics;
+                if (data.pdfContext) {
+                    state.pdfContext = data.pdfContext;
+                }
                 renderTopicChecklist();
                 showStep(2);
                 document.getElementById('step1-message').innerHTML = '';
@@ -317,7 +339,8 @@
                         focusSlider: state.focusSlider,
                         selectedTopics: state.selectedTopics,
                         chosenSong: state.chosenSong,
-                        songLyrics: state.songLyrics
+                        songLyrics: state.songLyrics,
+                        pdfContext: state.pdfContext || ''
                     })
                 });
 
@@ -348,7 +371,8 @@
                 selectedTopics: [],
                 chosenSong: '',
                 songLyrics: '',
-                parodyLyrics: ''
+                parodyLyrics: '',
+                pdfContext: ''
             };
 
             document.getElementById('mathConcept').value = '';
@@ -357,6 +381,8 @@
             document.getElementById('songSearch').value = '';
             document.getElementById('selectedSongDisplay').innerHTML = '';
             document.getElementById('proceedToLyricsBtn').disabled = true;
+            document.getElementById('pdfUpload').value = '';
+            document.getElementById('pdfStatus').innerHTML = '';
 
             showStep(1);
         }

@@ -3,3 +3,5 @@ python-dotenv
 flask
 requests
 pandas
+PyPDF2
+pymupdf
