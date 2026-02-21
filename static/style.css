@@ -65,7 +65,16 @@
     .slider-labels {
         flex-direction: column;
         gap: 8px;
-        }
+    }
+    .step-with-preferences {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .preferences-panel {
+        width: 100%;
+        order: -1;
+    }
 }
 /* Remove duplicate selector, keep only correct one */
 .toggle-switch {
@@ -114,18 +123,19 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
     padding: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 .container {
     background: #fff8e1; /* sandy creamy yellow */
     border-radius: 15px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    max-width: 900px;
     width: 100%;
+    max-width: 1600px;
     padding: 40px;
-    max-height: 90vh;
+    max-height: 95vh;
     overflow-y: auto;
 }
 
@@ -153,6 +163,91 @@ h2 {
 
 .step.hidden {
     display: none;
+}
+
+/* Layout for steps with preferences panel */
+.step-with-preferences {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+.step-main-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.preferences-panel {
+    width: 350px;
+    background: #e3f6f5;
+    border-radius: 10px;
+    border: 2px solid #87ceeb;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.preferences-header {
+    background: linear-gradient(135deg, #87ceeb 0%, #20b2aa 100%);
+    color: #fff8e1;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    font-weight: bold;
+}
+
+.preferences-header:hover {
+    background: linear-gradient(135deg, #7db8d4 0%, #1a9f87 100%);
+}
+
+.preferences-toggle {
+    font-size: 1.2em;
+    transition: transform 0.3s;
+}
+
+.preferences-toggle.collapsed {
+    transform: rotate(-90deg);
+}
+
+.preferences-content {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+    transition: max-height 0.3s;
+}
+
+.preferences-content.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
+.preferences-section {
+    margin-bottom: 20px;
+}
+
+.preferences-section-title {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: #20b2aa;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 1200px) {
+    .step-with-preferences {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .preferences-panel {
+        width: 100%;
+        order: -1; /* Move preferences panel above main content */
+    }
 }
 
 .form-group {

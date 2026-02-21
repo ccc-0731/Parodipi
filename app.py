@@ -79,12 +79,7 @@ def generate_topic_checklist(math_concept, level, focus_slider, pdf_context=""):
     Current focus level: {focus_slider}/100
     
     Return ONLY valid JSON in this format (no markdown, no code blocks):
-    {{
-        "topics": [
-            {{"name": "topic_name", "description": "brief description"}},
-            ...
-        ]
-    }}
+    
     """
     
     result = call_gemini_text(prompt)
@@ -121,10 +116,10 @@ def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, c
     """
     
     focus_string = get_focus_prompt(focus_slider)
-    prompt = f"""
-    You are a creative songwriter. Create a parody version of the following song that teaches about {subject}.
+    prompt1 = f"""
+    You are a creative songwriter that demonstrates your reasoning process. Create a parody version of the following song that teaches about {subject}.
     
-    Key concepts to include: {topics_str}
+    Key concepts that you MUST include: {topics_str}
     {pdf_section}
     {focus_string}
     Learning/Teaching focus (0=learning experience, 100=teaching): {focus_slider}/100
@@ -142,12 +137,38 @@ def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, c
     3. Write new lyrics with the SAME meaning structure and EXACT syllable counts.
     4. For every generated line, show syllable breakdown.
     5. Perform a final verification pass and fix mismatches.
+    6. Don't forget to find a title for the final parody song (that is also a parody of the original title).
     
-    Return ONLY the parody lyrics, nothing else.
+    Make sure you clearly indicate which lines are the finalized parody lyrics.
     """
     
-    result = call_gemini_text(prompt)
-    return result['raw']
+    reasoningResult = call_gemini_text(prompt1)
+    print(f"[DEBUG] Parody lyrics reasoning process: {reasoningResult['raw']}")
+
+    prompt2 = f"""You are a formatter that extracts the finalized parody lyrics from the following reasoning process 
+        and returns ONLY the final title and lyrics as valid JSON.
+        
+        Return ONLY valid JSON in this exact format (no markdown, no code blocks, no additional text):
+        {{
+            "title": "Parody Song Title",
+            "lyrics": "Full parody lyrics here, with [Verse 1], [Chorus] for each section."
+        }}
+    """
+    result = call_gemini_text(prompt2 + reasoningResult['raw'])
+    
+    try:
+        # Clean up response if needed
+        text = result['raw'].strip()
+        if text.startswith('```'):
+            text = text.split('\n', 1)[1]
+            if text.endswith('```'):
+                text = text.rsplit('\n', 1)[0]
+        parody_data = json.loads(text)
+        return parody_data
+    except Exception as e:
+        print(f"Error parsing parody JSON: {e}")
+        # Fallback: return raw text as lyrics if JSON parsing fails
+        return {"title": f"{chosen_song} (Math Parody)", "lyrics": result['raw']}
 
 # ============= ROUTES =============
 
@@ -267,9 +288,12 @@ def generate_parody():
     if not math_concept and not pdf_context:
         return jsonify({"error": "Please provide a math concept or PDF context"}), 400
     
-    parody_lyrics = generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, chosen_song, song_lyrics, pdf_context)
+    parody_data = generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, chosen_song, song_lyrics, pdf_context)
     
-    return jsonify({"parodyLyrics": parody_lyrics})
+    return jsonify({
+        "parodyTitle": parody_data.get("title", f"{chosen_song} (Math Parody)"),
+        "parodyLyrics": parody_data.get("lyrics", "")
+    })
 
 @app.route("/api/youtube-search", methods=["GET"])
 def youtube_search():
