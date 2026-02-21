@@ -453,6 +453,42 @@ button:disabled {
     color: #333;
 }
 
+/* Selectable lyric lines */
+.lyric-line {
+    padding: 3px 8px;
+    margin: 1px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: pre-wrap;
+}
+
+.lyric-line:not(.lyric-spacer):hover {
+    background: rgba(102, 126, 234, 0.12);
+}
+
+.lyric-line.lyric-selected {
+    background: rgba(102, 126, 234, 0.25);
+    border-left: 3px solid #667eea;
+    padding-left: 5px;
+    color: #334;
+}
+
+.lyric-spacer {
+    cursor: default;
+    height: 8px;
+}
+
+.lyrics-hint {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 0.8em;
+    color: #888;
+    text-align: center;
+    padding: 6px 0 10px;
+    border-bottom: 1px dashed #ccc;
+    margin-bottom: 8px;
+}
+
 .loading {
     display: inline-block;
     width: 20px;

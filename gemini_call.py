@@ -6,15 +6,17 @@ load_dotenv()
 
 # Environment-configured models / keys
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-GEMINI_MODEL = os.getenv('GEMINI_TEXT_MODEL', 'gemini-1.5-flash')
+GEMINI_MODEL = os.getenv('GEMINI_TEXT_MODEL', 'gemini-2.0-flash')
+
+# Create the client once
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 def call_gemini_text(prompt, system=None):
-	"""Call Google Gemini text API via google.genai library."""
+	"""Call Google Gemini text API via google-genai library."""
 	try:
-		client = genai.Client(api_key=GEMINI_API_KEY)
 		response = client.models.generate_content(
 			model=GEMINI_MODEL,
-			contents=prompt
+			contents=prompt,
 		)
 		text = response.text if response else ''
 		return {'raw': text}

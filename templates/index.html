@@ -305,6 +305,23 @@
                     
                     <div id="parodyLyricsDisplay" class="lyrics-display"></div>
 
+            <!-- Explain Selected Lines Panel -->
+            <div id="explainPanel" style="display: none; margin-top: 12px; max-width: 100%;">
+                <button id="explainBtn" onclick="explainSelectedLines()" style="margin-bottom: 10px;">🤔 Explain Selected Lines</button>
+                <div id="explainResult" style="display: none; background: #fffbe7; border: 2px solid #e0c97f; border-radius: 10px; padding: 16px 20px; font-size: 0.95em; line-height: 1.7; color: #333; position: relative;">
+                    <button onclick="closeExplanation()" style="position: absolute; top: 8px; right: 12px; background: none; border: none; font-size: 1.2em; cursor: pointer; color: #999; padding: 0; min-width: auto; box-shadow: none;">✕</button>
+                    <div id="explainText"></div>
+                </div>
+            </div>
+
+            <!-- Related Resources Section -->
+            <div id="resourceLinksSection" style="margin-top: 24px; margin-bottom: 20px; display: none;">
+                <h3 style="color: #888; font-size: 0.95em; margin-bottom: 12px;">📚 Learn More About These Concepts</h3>
+                <div id="resourceLinksContainer" style="display: flex; flex-direction: column; gap: 10px; max-width: 560px; margin: 0 auto;">
+                </div>
+                <div id="resourceLinksLoading" style="text-align: center; color: #999; font-size: 0.85em; margin-top: 8px;">Finding resources...</div>
+            </div>
+
                     <button onclick="startOver()">Start Over</button>
                     <button class="secondary" onclick="copySongToClipboard()">Copy Lyrics</button>
                     <div id="step4-message"></div>
@@ -754,8 +771,8 @@
             showMessage('step3-message', 'Generating your parody song and finding the original video...');
 
             try {
-                // Fetch parody lyrics and YouTube video in parallel
-                const [parodyResponse, videoResponse] = await Promise.all([
+                // Fetch parody lyrics, YouTube video, and resource links in parallel
+                const [parodyResponse, videoResponse, resourceResponse] = await Promise.all([
                     fetch('/api/generate-parody', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -769,7 +786,15 @@
                             pdfContext: state.pdfContext || ''
                         })
                     }),
-                    fetch(`/api/youtube-search?title=${encodeURIComponent(state.chosenSong)}&artist=${encodeURIComponent(state.chosenArtist || '')}`)
+                    fetch(`/api/youtube-search?title=${encodeURIComponent(state.chosenSong)}&artist=${encodeURIComponent(state.chosenArtist || '')}`),
+                    fetch('/api/resource-links', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            topics: state.selectedTopics,
+                            mathConcept: state.mathConcept
+                        })
+                    })
                 ]);
 
                 if (!parodyResponse.ok) {
@@ -780,7 +805,7 @@
                 state.parodyLyrics = parodyData.parodyLyrics;
 
                 document.getElementById('songTitleDisplay').textContent = `🎵 ${parodyData.parodyTitle || state.chosenSong + ' (Math Parody)'}`;
-                document.getElementById('parodyLyricsDisplay').textContent = state.parodyLyrics;
+                renderParodyLyrics(state.parodyLyrics);
 
                 // Handle YouTube video embed
                 const videoSection = document.getElementById('originalVideoSection');
@@ -803,6 +828,47 @@
                 } catch (videoErr) {
                     console.log('[YouTube] Error handling video:', videoErr);
                     videoSection.style.display = 'none';
+                }
+
+                // Handle resource links
+                const resourceSection = document.getElementById('resourceLinksSection');
+                const resourceContainer = document.getElementById('resourceLinksContainer');
+                const resourceLoading = document.getElementById('resourceLinksLoading');
+                try {
+                    if (resourceResponse.ok) {
+                        const resourceData = await resourceResponse.json();
+                        console.log('[Resources] Response:', resourceData);
+                        if (resourceData.links && resourceData.links.length > 0) {
+                            resourceContainer.innerHTML = '';
+                            resourceData.links.forEach(link => {
+                                const a = document.createElement('a');
+                                a.href = link.url;
+                                a.target = '_blank';
+                                a.rel = 'noopener noreferrer';
+                                a.style.cssText = 'display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #f0f4ff; border-radius: 10px; text-decoration: none; color: #333; transition: background 0.2s; border: 1px solid #e0e4f0;';
+                                a.onmouseover = () => a.style.background = '#e0e8ff';
+                                a.onmouseout = () => a.style.background = '#f0f4ff';
+                                a.innerHTML = `
+                                    <span style="font-size: 1.4em;">${link.icon}</span>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-weight: 600; font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${link.title}</div>
+                                        <div style="font-size: 0.75em; color: #667eea;">${link.source}</div>
+                                    </div>
+                                    <span style="color: #667eea; font-size: 0.85em;">↗</span>
+                                `;
+                                resourceContainer.appendChild(a);
+                            });
+                            resourceLoading.style.display = 'none';
+                            resourceSection.style.display = 'block';
+                        } else {
+                            resourceSection.style.display = 'none';
+                        }
+                    } else {
+                        resourceSection.style.display = 'none';
+                    }
+                } catch (resourceErr) {
+                    console.log('[Resources] Error:', resourceErr);
+                    resourceSection.style.display = 'none';
                 }
 
                 showStep(4);
@@ -891,6 +957,120 @@
             }
         }
 
+        // Render parody lyrics as selectable lines
+        function renderParodyLyrics(lyrics) {
+            const container = document.getElementById('parodyLyricsDisplay');
+            container.innerHTML = '';
+            const lines = lyrics.split('\n');
+            lines.forEach((line, index) => {
+                const lineEl = document.createElement('div');
+                lineEl.className = 'lyric-line';
+                lineEl.dataset.index = index;
+                // Empty lines are just spacers
+                if (line.trim() === '') {
+                    lineEl.classList.add('lyric-spacer');
+                    lineEl.innerHTML = '&nbsp;';
+                } else {
+                    lineEl.textContent = line;
+                    lineEl.onclick = () => toggleLineSelection(lineEl);
+                }
+                container.appendChild(lineEl);
+            });
+            // Add hint text
+            const hint = document.createElement('div');
+            hint.className = 'lyrics-hint';
+            hint.textContent = '💡 Click on any line to select it, then press "Explain" to understand the math!';
+            container.insertBefore(hint, container.firstChild);
+            // Reset explanation panel
+            document.getElementById('explainPanel').style.display = 'none';
+            document.getElementById('explainResult').style.display = 'none';
+        }
+
+        // Track selected lines
+        let selectedLineIndices = new Set();
+
+        function toggleLineSelection(lineEl) {
+            const index = parseInt(lineEl.dataset.index);
+            if (selectedLineIndices.has(index)) {
+                selectedLineIndices.delete(index);
+                lineEl.classList.remove('lyric-selected');
+            } else {
+                selectedLineIndices.add(index);
+                lineEl.classList.add('lyric-selected');
+            }
+            // Show/hide explain button
+            const panel = document.getElementById('explainPanel');
+            if (selectedLineIndices.size > 0) {
+                panel.style.display = 'block';
+                const count = selectedLineIndices.size;
+                document.getElementById('explainBtn').textContent = `🤔 Explain Selected Line${count > 1 ? 's' : ''} (${count})`;
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        // Ask AI to explain selected lines
+        async function explainSelectedLines() {
+            if (selectedLineIndices.size === 0) return;
+
+            const allLines = state.parodyLyrics.split('\n');
+            const selected = Array.from(selectedLineIndices)
+                .sort((a, b) => a - b)
+                .map(i => allLines[i])
+                .filter(l => l && l.trim() !== '');
+
+            if (selected.length === 0) return;
+
+            const btn = document.getElementById('explainBtn');
+            const resultDiv = document.getElementById('explainResult');
+            const textDiv = document.getElementById('explainText');
+
+            btn.disabled = true;
+            btn.textContent = '🤔 Thinking...';
+            resultDiv.style.display = 'block';
+            textDiv.innerHTML = '<span style="color: #999;">Asking AI to explain...</span>';
+
+            try {
+                const response = await fetch('/api/explain-line', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lines: selected.join('\n'),
+                        mathConcept: state.mathConcept,
+                        level: state.level,
+                        selectedTopics: state.selectedTopics,
+                        fullLyrics: state.parodyLyrics
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to get explanation');
+
+                const data = await response.json();
+                // Render with basic formatting (support bold, newlines)
+                textDiv.innerHTML = formatExplanation(data.explanation);
+            } catch (err) {
+                textDiv.innerHTML = `<span style="color: #d32f2f;">Error: ${err.message}</span>`;
+            } finally {
+                btn.disabled = false;
+                const count = selectedLineIndices.size;
+                btn.textContent = `🤔 Explain Selected Line${count > 1 ? 's' : ''} (${count})`;
+            }
+        }
+
+        // Format explanation text with basic markdown support
+        function formatExplanation(text) {
+            return text
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/`(.+?)`/g, '<code style="background:#f0f0f0;padding:2px 5px;border-radius:3px;font-size:0.9em;">$1</code>')
+                .replace(/\n/g, '<br>');
+        }
+
+        // Close explanation panel
+        function closeExplanation() {
+            document.getElementById('explainResult').style.display = 'none';
+        }
+
         // Start over
         function startOver() {
             state = {
@@ -923,6 +1103,11 @@
             document.getElementById('audioPlayerSection').style.display = 'none';
             document.getElementById('audioPlayer').src = '';
             document.getElementById('audioPlayer').pause();
+            document.getElementById('resourceLinksSection').style.display = 'none';
+            document.getElementById('resourceLinksContainer').innerHTML = '';
+            document.getElementById('explainPanel').style.display = 'none';
+            document.getElementById('explainResult').style.display = 'none';
+            selectedLineIndices = new Set();
 
             showStep(1);
         }
