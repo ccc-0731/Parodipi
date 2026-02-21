@@ -331,11 +331,33 @@
                 <div id="resourceLinksLoading" style="text-align: center; color: #999; font-size: 0.85em; margin-top: 8px;">Finding resources...</div>
             </div>
 
+<<<<<<< Updated upstream
                     <button onclick="startOver()">Start Over</button>
                     <button class="secondary" onclick="copySongToClipboard()">Copy Lyrics</button>
                     <div id="step4-message"></div>
                 </div>
             </div>
+=======
+            <!-- Explain Selected Lines Panel -->
+            <div id="explainPanel" style="display: none; margin-top: 12px; max-width: 100%;">
+                <button id="explainBtn" onclick="explainSelectedLines()" style="margin-bottom: 10px;">🤔 Explain Selected Lines</button>
+                <div id="explainResult" style="display: none; background: #fffbe7; border: 2px solid #e0c97f; border-radius: 10px; padding: 16px 20px; font-size: 0.95em; line-height: 1.7; color: #333; position: relative;">
+                    <button onclick="closeExplanation()" style="position: absolute; top: 8px; right: 12px; background: none; border: none; font-size: 1.2em; cursor: pointer; color: #999; padding: 0; min-width: auto; box-shadow: none;">✕</button>
+                    <div id="explainText"></div>
+                </div>
+            </div>
+
+            <!-- Related Resources Section -->
+            <div id="resourceLinksSection" style="margin-top: 24px; margin-bottom: 20px; display: none;">
+                <h3 style="color: #888; font-size: 0.95em; margin-bottom: 12px;">📚 Learn More About These Concepts</h3>
+                <div id="resourceLinksContainer" style="display: flex; flex-direction: column; gap: 10px; max-width: 560px; margin: 0 auto;">
+                </div>
+                <div id="resourceLinksLoading" style="text-align: center; color: #999; font-size: 0.85em; margin-top: 8px;">Finding resources...</div>
+            </div>
+
+            <button onclick="startOver()">Start Over</button>
+            <button class="secondary" onclick="copySongToClipboard()">Copy Lyrics</button>
+>>>>>>> Stashed changes
         </div>
     </div>
 
@@ -813,7 +835,11 @@
                 const parodyData = await parodyResponse.json();
                 state.parodyLyrics = parodyData.parodyLyrics;
 
+<<<<<<< Updated upstream
                 document.getElementById('songTitleDisplay').textContent = `🎵 ${parodyData.parodyTitle || state.chosenSong + ' (Math Parody)'}`;
+=======
+                document.getElementById('songTitleDisplay').textContent = `🎵 ${state.chosenSong} (Math Parody)`;
+>>>>>>> Stashed changes
                 renderParodyLyrics(state.parodyLyrics);
 
                 // Handle YouTube video embed
@@ -966,6 +992,7 @@
             }
         }
 
+<<<<<<< Updated upstream
         // Track which lyrics view is active: 'parody' or 'original'
         let currentLyricsView = 'parody';
 
@@ -1011,6 +1038,8 @@
             container.insertBefore(hint, container.firstChild);
         }
 
+=======
+>>>>>>> Stashed changes
         // Render parody lyrics as selectable lines
         function renderParodyLyrics(lyrics) {
             const container = document.getElementById('parodyLyricsDisplay');
@@ -1162,10 +1191,13 @@
             document.getElementById('explainPanel').style.display = 'none';
             document.getElementById('explainResult').style.display = 'none';
             selectedLineIndices = new Set();
+<<<<<<< Updated upstream
             currentLyricsView = 'parody';
             document.getElementById('lyricsSwitch').checked = false;
             document.getElementById('toggleLabelParody').classList.add('active');
             document.getElementById('toggleLabelOriginal').classList.remove('active');
+=======
+>>>>>>> Stashed changes
 
             showStep(1);
         }
