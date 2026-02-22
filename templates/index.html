@@ -10,10 +10,29 @@
 </head>
 <body>
     <div class="container">
-        <h1><img src="/static/logo.png" alt="Parodipi" class="header-logo"> Parodipi </h1>
+        <h1>
+            <img src="/static/logo.png" alt="Parodipi" class="header-logo"> Parodipi
+        </h1>
+
+        <!-- Saved Parodies Modal -->
+        <div id="parodiesModal" class="modal-overlay" style="display: none;" onclick="if(event.target===this)closeParodiesModal()">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeParodiesModal()">✕</button>
+                <h2>📚 My Saved Parodies</h2>
+                <div id="parodiesList"></div>
+            </div>
+        </div>
 
         <!-- STEP 1: Math Concept & Settings -->
         <div class="step" id="step1">
+            <!-- User Bar -->
+            <div class="user-bar">
+                <span class="username">👤 {{ username }}</span>
+                {% if not is_guest %}
+                <button class="history-btn" onclick="showSavedParodies()">📚 My Parodies</button>
+                {% endif %}
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
             <h2><span class="step-counter">1</span>Choose Your Math Concept</h2>
             
             <div class="form-group">
@@ -352,6 +371,12 @@
 
             <button onclick="startOver()">Start Over</button>
             <button class="secondary" onclick="copySongToClipboard()">Copy Lyrics</button>
+            {% if not is_guest %}
+            <button onclick="saveCurrentParody()" id="saveParodyBtn" style="background: linear-gradient(135deg, #20b2aa, #4ecdc4);">💾 Save Parody</button>
+            {% else %}
+            <button onclick="alert('Sign up to save your parodies!')" class="secondary" style="opacity: 0.6;">💾 Save (Sign up required)</button>
+            {% endif %}
+            <div id="saveMessage" style="color: #4ecdc4; font-size: 0.85em; margin-top: 8px; text-align: center;"></div>
         </div>
     </div>
 
@@ -1227,6 +1252,116 @@
 
         // Initialize
         showStep(1);
+
+        // ===== LOGIN / SAVE / HISTORY =====
+
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
+            window.location.href = '/login';
+        }
+
+        async function saveCurrentParody() {
+            const btn = document.getElementById('saveParodyBtn');
+            const msg = document.getElementById('saveMessage');
+            btn.disabled = true;
+            btn.textContent = '💾 Saving...';
+
+            try {
+                const resp = await fetch('/api/save-parody', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        mathConcept: state.mathConcept,
+                        level: state.level,
+                        topics: state.selectedTopics,
+                        songTitle: state.chosenSong,
+                        artist: state.chosenArtist,
+                        parodyTitle: document.getElementById('songTitleDisplay')?.textContent || '',
+                        parodyLyrics: state.parodyLyrics,
+                        originalLyrics: state.songLyrics
+                    })
+                });
+                const data = await resp.json();
+                if (data.error) {
+                    msg.style.color = '#ff6b6b';
+                    msg.textContent = data.error;
+                } else {
+                    msg.style.color = '#4ecdc4';
+                    msg.textContent = '✅ Parody saved to your collection!';
+                }
+            } catch (e) {
+                msg.style.color = '#ff6b6b';
+                msg.textContent = 'Error saving parody';
+            }
+            btn.disabled = false;
+            btn.textContent = '💾 Save Parody';
+        }
+
+        async function showSavedParodies() {
+            const modal = document.getElementById('parodiesModal');
+            const list = document.getElementById('parodiesList');
+            list.innerHTML = '<p style="color:#999; text-align:center;">Loading...</p>';
+            modal.style.display = 'flex';
+
+            try {
+                const resp = await fetch('/api/my-parodies');
+                const data = await resp.json();
+
+                if (!data.parodies || data.parodies.length === 0) {
+                    list.innerHTML = '<div class="no-parodies">No saved parodies yet.<br>Generate a parody and click 💾 Save!</div>';
+                    return;
+                }
+
+                list.innerHTML = data.parodies.map(p => `
+                    <div class="saved-parody-card">
+                        <h3>${p.parody_title || p.song_title + ' (Math Parody)'}</h3>
+                        <div class="saved-parody-meta">
+                            🎵 ${p.song_title} by ${p.artist}<br>
+                            📐 ${p.math_concept} (${p.level})<br>
+                            🏷️ ${(p.topics || []).join(', ')}<br>
+                            📅 ${new Date(p.created_at).toLocaleDateString()}
+                        </div>
+                        <div class="parody-actions">
+                            <button class="view-btn" onclick="viewSavedParody('${p.parody_id}')">View Lyrics</button>
+                            <button class="delete-btn" onclick="deleteSavedParody('${p.parody_id}')">Delete</button>
+                        </div>
+                        <div id="lyrics-${p.parody_id}" style="display:none; margin-top:12px; background:#0d0d1a; padding:14px; border-radius:8px; white-space:pre-wrap; font-size:0.9em; color:#ddd; max-height:300px; overflow-y:auto;"></div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                list.innerHTML = '<div class="no-parodies">Error loading parodies</div>';
+            }
+        }
+
+        function viewSavedParody(parodyId) {
+            const el = document.getElementById('lyrics-' + parodyId);
+            if (el.style.display === 'none') {
+                // Fetch from the already-loaded data
+                fetch('/api/my-parodies').then(r => r.json()).then(data => {
+                    const p = data.parodies.find(x => x.parody_id === parodyId);
+                    if (p) {
+                        el.textContent = p.parody_lyrics;
+                        el.style.display = 'block';
+                    }
+                });
+            } else {
+                el.style.display = 'none';
+            }
+        }
+
+        async function deleteSavedParody(parodyId) {
+            if (!confirm('Delete this saved parody?')) return;
+            await fetch('/api/delete-parody', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ parody_id: parodyId })
+            });
+            showSavedParodies(); // Refresh the list
+        }
+
+        function closeParodiesModal() {
+            document.getElementById('parodiesModal').style.display = 'none';
+        }
     </script>
 </body>
 </html>

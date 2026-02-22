@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parodipi — Login</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <img src="/static/logo.png" alt="Parodipi" class="login-logo">
+            <h1>Parodipi</h1>
+            <p class="login-subtitle">Turn math into music 🎶</p>
+
+            <!-- Tab switcher -->
+            <div class="login-tabs">
+                <button class="login-tab active" onclick="showTab('login')">Sign In</button>
+                <button class="login-tab" onclick="showTab('signup')">Sign Up</button>
+            </div>
+
+            <!-- Sign In Form -->
+            <form id="loginForm" class="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" placeholder="Enter your username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="login-btn">Sign In</button>
+            </form>
+
+            <!-- Sign Up Form -->
+            <form id="signupForm" class="login-form" style="display: none;" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label for="signupUsername">Choose a username</label>
+                    <input type="text" id="signupUsername" placeholder="Pick a username" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Create a password</label>
+                    <input type="password" id="signupPassword" placeholder="Create a password" required minlength="4">
+                </div>
+                <div class="form-group">
+                    <label for="signupConfirm">Confirm password</label>
+                    <input type="password" id="signupConfirm" placeholder="Confirm your password" required>
+                </div>
+                <button type="submit" class="login-btn">Create Account</button>
+            </form>
+
+            <div id="loginMessage" class="login-message"></div>
+
+            <div class="login-divider">
+                <span>or</span>
+            </div>
+
+            <button class="guest-btn" onclick="handleGuest()">
+                Continue as Guest
+            </button>
+            <p class="guest-note">Guest sessions don't save your parody history</p>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+            document.getElementById('loginMessage').textContent = '';
+            event.target.classList.add('active');
+        }
+
+        function showMessage(msg, isError = true) {
+            const el = document.getElementById('loginMessage');
+            el.textContent = msg;
+            el.className = 'login-message ' + (isError ? 'error' : 'success');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            const resp = await fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            });
+            const data = await resp.json();
+
+            if (data.error) {
+                showMessage(data.error);
+            } else {
+                showMessage('Welcome back, ' + data.username + '!', false);
+                setTimeout(() => window.location.href = '/', 500);
+            }
+        }
+
+        async function handleSignup(e) {
+            e.preventDefault();
+            const username = document.getElementById('signupUsername').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            const confirm = document.getElementById('signupConfirm').value;
+
+            if (password !== confirm) {
+                showMessage('Passwords do not match');
+                return;
+            }
+
+            const resp = await fetch('/api/signup', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            });
+            const data = await resp.json();
+
+            if (data.error) {
+                showMessage(data.error);
+            } else {
+                showMessage('Account created! Welcome, ' + data.username + '!', false);
+                setTimeout(() => window.location.href = '/', 500);
+            }
+        }
+
+        async function handleGuest() {
+            const resp = await fetch('/api/guest', { method: 'POST' });
+            const data = await resp.json();
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

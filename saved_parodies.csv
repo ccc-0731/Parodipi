@@ -1,0 +1,236 @@
+parody_id,user_id,math_concept,level,topics,song_title,artist,parody_title,parody_lyrics,original_lyrics,created_at
+582955b8,c05e21fe,Bijection,undergraduate,Function Definition (Prerequisite)|Injective Function (One-to-One)|Surjective Function (Onto)|Bijective Function (One-to-One Correspondence)|Inverse Functions|Cardinality of Sets|Composition of Bijections,What Makes You Beautiful,One Direction,🎵 What Makes You Bijective,"[Verse 1: Liam - Function Definition]
+You're a function, defined on a set
+Each x maps to just one y, you can bet
+Don't need special conditions for (Huh)
+Just mapping an element, that's enough
+
+[Pre-Chorus: Harry - Introducing Surjective/Injective concepts by contrast]
+Some outputs might not get hit by an input
+Not every element's true
+
+[Chorus: All & Harry - Defining Surjective, Injective, Bijective]
+Oh, this function from domain A to set B
+Let's check properties, see if you're unique
+If each value in the codomain gets hit
+Then you're surjective, oh-oh, you're mapping right
+If only one input can reach its output
+Then you're injective, and there is no doubt
+With both properties present, it's plain to see
+You're a bijection, oh-oh, one-to-one and onto
+That's what makes you bijective
+
+[Verse 2: Zayn - Inverse Functions, Cardinality]
+If a function is bijective and true
+An inverse function will exist for you
+From B back to A, it's clear and bright
+A one-to-one correspondence, shining light
+
+[Pre-Chorus: Harry - Cardinality]
+If a bijection is seen, it's plain to see
+Cardinalities agree
+
+[Chorus: All & Harry - Repetition of Bijective definition]
+Oh, this function from domain A to set B
+Let's check properties, see if you're unique
+If each value in the codomain gets hit
+Then you're surjective, oh-oh, you're mapping right
+If only one input can reach its output
+Then you're injective, and there is no doubt
+With both properties present, it's plain to see
+You're a bijection, oh-oh, one-to-one and onto
+That's what makes you bijective
+
+[Bridge: All - Composition of Bijections]
+If F and G are both bijective, see
+Their composition's neat
+It will also be bijective, you'll agree
+The proof is complete
+
+[Breakdown: Harry - Reinforcing Bijective Properties]
+Oh, this function from domain A to set B
+An injective mapping, no overlap found
+With surjectivity, all outputs are bound
+(You don't know, oh-oh) You're a bijection, profound
+
+[Chorus: All, Harry & Zayn - Final Repetition and Summary]
+Oh, this function from domain A to set B
+An injective mapping (c'mon), no overlap found
+With surjectivity (every output hit), all are bound
+You're a bijection, oh-oh, truly profound (Oh, woah)
+If only you saw what a bijection means
+It defines equivalence, between two domains
+How direct your mapping, oh-oh, makes us believe
+You're a bijection (bi-jection), oh-oh, one-to-one and onto
+You're a bijection, oh-oh, it's so clear
+That's what makes you bijective","[Verse 1: Liam]
+You're insecure, don't know what for
+You're turnin' heads when you walk through the door
+Don't need makeup to cover up (Huh)
+Bein' the way that you are is enough
+
+[Pre-Chorus: Harry]
+Everyone else in the room can see it
+Everyone else but you
+
+[Chorus: All & Harry]
+Baby, you light up my world like nobody else
+The way that you flip your hair gets me overwhelmed
+But when you smile at the ground, it ain't hard to tell
+You don't know, oh-oh, you don't know you're beautiful
+If only you saw what I can see
+You'll understand why I want you so desperately
+Right now I'm looking at you and I can't believe
+You don't know, oh-oh, you don't know you're beautiful, oh-oh
+That's what makes you beautiful
+
+[Verse 2: Zayn]
+So c-come on, you got it wrong
+To prove I'm right, I put it in a song
+I don't know why you're being shy
+And turn away when I look into your eyes
+
+
+[Pre-Chorus: Harry]
+Everyone else in the room can see it
+Everyone else but you
+
+[Chorus: All & Harry]
+Baby, you light up my world like nobody else ('Body else)
+The way that you flip your hair gets me overwhelmed
+But when you smile at the ground, it ain't hard to tell
+You don't know, oh-oh, you don't know you're beautiful (Oh)
+If only you saw what I can see
+You'll understand why I want you so desperately
+Right now I'm looking at you and I can't believe
+You don't know, oh-oh, you don't know you're beautiful, oh-oh
+That's what makes you beautiful
+
+[Bridge: All]
+Na, na-na-na, na-na-na, na, na
+Na, na-na-na, na-na
+Na, na-na-na, na-na-na, na, na
+Na, na-na-na, na-na
+
+[Breakdown: Harry]
+Baby, you light up my world like nobody else
+The way that you flip your hair gets me overwhelmed
+But when you smile at the ground, it ain't hard to tell
+(You don't know, oh-oh) You don't know you're beautiful
+
+
+[Chorus: All, Harry & Zayn]
+Baby, you light up my world like nobody else (Light up my world like nobody else)
+The way that you flip your hair (C'mon) gets me overwhelmed
+But when you smile at the ground (Smile at the ground), it ain't hard to tell
+You don't know, oh-oh, you don't know you're beautiful (Oh, woah)
+If only you saw what I can see
+You'll understand why I want you so desperately (Desperately)
+Right now I'm looking at you and I can't believe
+You don't know (Don't know), oh-oh, you don't know you're beautiful, oh-oh
+You don't know you're beautiful, oh-oh
+That's what makes you beautiful
+
+[Written By Savan Kotecha]",2026-02-21T22:47:14.878975
+8a6d9052,c05e21fe,,undergraduate,Cardinality of Infinite Sets|Power Set|Bijective Functions|Injective Functions|Cantor's Diagonal Argument|Schröder–Bernstein Theorem|Construction of Bijections,Sweet Caroline,Neil Diamond,🎵 Sweet Cardinality,"[Verse 1]
+The world of sets
+We can't just count them one by one
+Infinite size can be so grand
+With one to one
+Mappings come so very clear
+For cardinality's true test
+
+[Pre-Chorus]
+Map
+A function maps
+Relate a set
+An arrow from A to B
+
+[Chorus]
+Sweet Cardinality
+New understanding felt so right
+When Cantor showed
+Infinite is not all the same
+Oh, it's true
+
+[Verse 2]
+Take a power set
+It's all subsets you could form from it
+The set of N's power P of N
+Is bigger than
+The N's cardinality
+Cantor diagonal showed us how
+
+[Pre-Chorus]
+Maps
+One to one surjective
+A bijection then
+Shows sets are equivalent
+
+[Chorus]
+Sweet Cardinality
+With P of N and then the Reals
+A bijection built
+To show they're both the same in size
+We know it's true
+
+[Instrumental Break / Mathematical Interlude]
+
+[Chorus]
+Sweet Cardinality
+For injections one to one
+Sweet Cardinality
+A surjection means it's on to
+Sweet Cardinality
+Schroder Bernstein comes to help","[Verse 1]
+Where it began
+I can't begin to know when
+But then I know it's growin' strong
+Was in the spring
+And spring became the summer
+Who'd have believed you'd come along?
+
+[Pre-Chorus]
+Hands
+Touchin' hands
+Reachin' out
+Touchin' me, touchin' you
+
+[Chorus]
+Sweet Caroline
+Good times never seemed so good
+I've been inclined
+To believe they never would
+But now I
+
+[Verse 2]
+Look at the night
+And it don't seem so lonely
+We fill it up with only two
+And when I hurt
+Hurtin' runs off my shoulders
+How can I hurt when holdin' you?
+
+
+[Pre-Chorus]
+Warm
+Touching warm
+Reachin' out
+Touchin' me, touchin' you
+
+[Chorus]
+Sweet Caroline
+Good times never seemed so good
+I've been inclined
+To believe they never would
+Oh no, no
+
+[Instrumental Break]
+
+[Chorus]
+Sweet Caroline
+Good times never seemed so good
+Sweet Caroline
+I believe they never could
+Sweet Caroline
+Good times never seemed so good",2026-02-21T22:54:51.438526
