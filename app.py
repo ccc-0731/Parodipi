@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, Response
+from flask import Flask, request, jsonify, render_template, Response, session, redirect, url_for
 import json
 import os
 import re
@@ -6,11 +6,13 @@ import urllib.parse
 import requests as http_requests
 from gemini_call import call_gemini_text
 from song_database import search_songs, get_song_lyrics, get_random_song
+from user_database import create_user, authenticate_user, create_guest_user, save_parody, get_user_parodies, delete_parody
 
 # Import focus mapping function
 from focus_mapping import get_focus_prompt
 
 app = Flask(__name__)
+app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'parodipi-dev-secret-key-change-in-prod')
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -193,8 +195,112 @@ def random_song():
 
 @app.route("/")
 def index():
-    """Serve the main page."""
-    return render_template("index.html")
+    """Serve the main page — requires login."""
+    if 'user_id' not in session:
+        return redirect(url_for('login_page'))
+    return render_template("index.html", 
+                           username=session.get('username', 'Guest'),
+                           is_guest=session.get('is_guest', False))
+
+@app.route("/login")
+def login_page():
+    """Serve the login page."""
+    if 'user_id' in session:
+        return redirect(url_for('index'))
+    return render_template("login.html")
+
+@app.route("/api/login", methods=["POST"])
+def api_login():
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    password = data.get('password', '')
+    
+    if not username or not password:
+        return jsonify({"error": "Username and password are required"}), 400
+    
+    user_id, error = authenticate_user(username, password)
+    if error:
+        return jsonify({"error": error}), 401
+    
+    session['user_id'] = user_id
+    session['username'] = username
+    session['is_guest'] = False
+    return jsonify({"user_id": user_id, "username": username})
+
+@app.route("/api/signup", methods=["POST"])
+def api_signup():
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    password = data.get('password', '')
+    
+    if not username or not password:
+        return jsonify({"error": "Username and password are required"}), 400
+    if len(username) < 3:
+        return jsonify({"error": "Username must be at least 3 characters"}), 400
+    if len(password) < 4:
+        return jsonify({"error": "Password must be at least 4 characters"}), 400
+    
+    user_id, error = create_user(username, password)
+    if error:
+        return jsonify({"error": error}), 409
+    
+    session['user_id'] = user_id
+    session['username'] = username
+    session['is_guest'] = False
+    return jsonify({"user_id": user_id, "username": username})
+
+@app.route("/api/guest", methods=["POST"])
+def api_guest():
+    user_id = create_guest_user()
+    session['user_id'] = user_id
+    session['username'] = 'Guest'
+    session['is_guest'] = True
+    return jsonify({"user_id": user_id, "username": "Guest"})
+
+@app.route("/api/logout", methods=["POST"])
+def api_logout():
+    session.clear()
+    return jsonify({"ok": True})
+
+@app.route("/api/save-parody", methods=["POST"])
+def api_save_parody():
+    if 'user_id' not in session:
+        return jsonify({"error": "Not logged in"}), 401
+    if session.get('is_guest'):
+        return jsonify({"error": "Guests cannot save parodies. Sign up to save!"}), 403
+    
+    data = request.get_json()
+    topic_names = [t.get('name', t) if isinstance(t, dict) else str(t) for t in data.get('topics', [])]
+    
+    parody_id = save_parody(
+        user_id=session['user_id'],
+        math_concept=data.get('mathConcept', ''),
+        level=data.get('level', ''),
+        topics=topic_names,
+        song_title=data.get('songTitle', ''),
+        artist=data.get('artist', ''),
+        parody_title=data.get('parodyTitle', ''),
+        parody_lyrics=data.get('parodyLyrics', ''),
+        original_lyrics=data.get('originalLyrics', '')
+    )
+    return jsonify({"parody_id": parody_id, "message": "Parody saved!"})
+
+@app.route("/api/my-parodies", methods=["GET"])
+def api_my_parodies():
+    if 'user_id' not in session:
+        return jsonify({"error": "Not logged in"}), 401
+    parodies = get_user_parodies(session['user_id'])
+    return jsonify({"parodies": parodies})
+
+@app.route("/api/delete-parody", methods=["POST"])
+def api_delete_parody():
+    if 'user_id' not in session:
+        return jsonify({"error": "Not logged in"}), 401
+    data = request.get_json()
+    deleted = delete_parody(session['user_id'], data.get('parody_id', ''))
+    if deleted:
+        return jsonify({"ok": True})
+    return jsonify({"error": "Not found"}), 404
 
 @app.route("/api/generate-topics", methods=["POST"])
 def generate_topics():

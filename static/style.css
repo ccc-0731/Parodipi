@@ -178,7 +178,11 @@ h2 {
 
     background: #e6f7ff;   /* ← ADD THIS */
     border-radius: 0 0 10px 10px;
+<<<<<<< HEAD
     border-top: 4px solid #20b2aa;
+=======
+    position: relative;
+>>>>>>> 067f8f6377de881d1f8b9da4c5468bbcd0a42a2d
 }
 
 .step.hidden {
@@ -677,4 +681,333 @@ button.secondary {
 
 button.secondary:hover {
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* ===== LOGIN PAGE ===== */
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.login-logo {
+    height: 90px;
+    width: auto;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.login-card h1 {
+    color: #20b2aa;
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+.login-subtitle {
+    color: #666;
+    font-size: 0.95em;
+    margin-bottom: 25px;
+}
+
+.login-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #ddd;
+}
+
+.login-tab {
+    flex: 1;
+    padding: 10px;
+    background: transparent;
+    color: #888;
+    border: none;
+    border-radius: 0;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 0;
+    box-shadow: none;
+}
+
+.login-tab.active {
+    background: #20b2aa;
+    color: #fff;
+}
+
+.login-tab:hover:not(.active) {
+    background: #e3f6f5;
+}
+
+.login-form .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.login-form label {
+    display: block;
+    color: #555;
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    background: #fff8e1;
+    color: #333;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.login-form input:focus {
+    border-color: #87ceeb;
+    outline: none;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #87ceeb 0%, #20b2aa 100%);
+    color: #fff8e1;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(32, 178, 170, 0.3);
+}
+
+.login-message {
+    margin-top: 12px;
+    font-size: 0.9em;
+    min-height: 20px;
+}
+
+.login-message.error { color: #d32f2f; }
+.login-message.success { color: #20b2aa; }
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+    color: #aaa;
+    font-size: 0.85em;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #ddd;
+}
+
+.login-divider span {
+    padding: 0 12px;
+}
+
+.guest-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: #20b2aa;
+    border: 2px solid #20b2aa;
+    border-radius: 10px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.guest-btn:hover {
+    background: #e3f6f5;
+    box-shadow: none;
+}
+
+.guest-note {
+    color: #999;
+    font-size: 0.8em;
+    margin-top: 8px;
+}
+
+/* ===== USER BAR (top-right of step box) ===== */
+
+.user-bar {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8em;
+    z-index: 10;
+}
+
+.user-bar .username {
+    color: #1a8a82;
+    font-weight: 600;
+}
+
+.user-bar button {
+    padding: 3px 8px;
+    font-size: 0.85em;
+    min-width: auto;
+    border-radius: 5px;
+    transform: none;
+}
+
+.user-bar button:hover {
+    transform: none;
+}
+
+.user-bar .history-btn {
+    background: rgba(255,255,255,0.5);
+    border: 1.5px solid #1a8a82;
+    color: #1a8a82;
+}
+
+.user-bar .history-btn:hover {
+    background: rgba(255,255,255,0.8);
+    box-shadow: none;
+    transform: none;
+}
+
+.user-bar .logout-btn {
+    background: rgba(255,255,255,0.5);
+    border: 1.5px solid #888;
+    color: #555;
+}
+
+.user-bar .logout-btn:hover {
+    border-color: #d32f2f;
+    color: #d32f2f;
+    background: rgba(255,255,255,0.8);
+    box-shadow: none;
+    transform: none;
+}
+
+/* ===== SAVED PARODIES MODAL ===== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content h2 {
+    color: #20b2aa;
+    margin-bottom: 20px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px; right: 20px;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    min-width: auto;
+    box-shadow: none;
+}
+
+.modal-close:hover {
+    color: #d32f2f;
+    transform: none;
+}
+
+.saved-parody-card {
+    background: #cfeeff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    border: 1px solid #b0dff5;
+}
+
+.saved-parody-card h3 {
+    color: #20b2aa;
+    font-size: 1em;
+    margin-bottom: 4px;
+}
+
+.saved-parody-meta {
+    color: #666;
+    font-size: 0.8em;
+    margin-bottom: 10px;
+}
+
+.saved-parody-card .parody-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.saved-parody-card button {
+    padding: 6px 12px;
+    font-size: 0.8em;
+    min-width: auto;
+    border-radius: 6px;
+}
+
+.saved-parody-card .view-btn {
+    background: linear-gradient(135deg, #87ceeb 0%, #20b2aa 100%);
+    color: #fff8e1;
+    border: none;
+}
+
+.saved-parody-card .delete-btn {
+    background: transparent;
+    border: 1px solid #d32f2f;
+    color: #d32f2f;
+}
+
+.saved-parody-card .delete-btn:hover {
+    background: rgba(211, 47, 47, 0.08);
+    box-shadow: none;
+}
+
+.no-parodies {
+    text-align: center;
+    color: #999;
+    padding: 30px;
+    font-size: 0.95em;
 }
