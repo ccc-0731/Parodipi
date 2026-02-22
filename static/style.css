@@ -135,6 +135,11 @@ h1 {
     text-align: center;
     font-size: 2.5em;
 
+    /* make it stay when scrolling */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
     /* layout */
     display: flex;
     align-items: center;
@@ -143,7 +148,7 @@ h1 {
 
     /* spacing */
     margin: 0;
-    margin-bottom: 30px;
+    margin-bottom: 0;
     padding: 40px 25px;
 
     /* styling */
@@ -169,7 +174,7 @@ h2 {
 .step {
     margin-bottom: 40px;
     padding: 20px;
-    background: #e3f6f5; /* light sky blue/sea green mix */
+    background: #cfeeff; /* light blue */
     border-radius: 0 0 10px 10px;
 }
 
@@ -191,12 +196,12 @@ h2 {
 
 .preferences-panel {
     width: 350px;
-    background: #e3f6f5;
+    background: #c8f5f0;          /* brighter pastel teal */
     border-radius: 10px;
-    border: 2px solid #87ceeb;
+    border: 2px solid #20b2aa; 
     padding: 0;
     overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06); /* softer shadow */
 }
 
 .preferences-header {
