@@ -331,13 +331,6 @@
                 <div id="resourceLinksLoading" style="text-align: center; color: #999; font-size: 0.85em; margin-top: 8px;">Finding resources...</div>
             </div>
 
-<<<<<<< Updated upstream
-                    <button onclick="startOver()">Start Over</button>
-                    <button class="secondary" onclick="copySongToClipboard()">Copy Lyrics</button>
-                    <div id="step4-message"></div>
-                </div>
-            </div>
-=======
             <!-- Explain Selected Lines Panel -->
             <div id="explainPanel" style="display: none; margin-top: 12px; max-width: 100%;">
                 <button id="explainBtn" onclick="explainSelectedLines()" style="margin-bottom: 10px;">🤔 Explain Selected Lines</button>
@@ -357,7 +350,6 @@
 
             <button onclick="startOver()">Start Over</button>
             <button class="secondary" onclick="copySongToClipboard()">Copy Lyrics</button>
->>>>>>> Stashed changes
         </div>
     </div>
 
@@ -835,11 +827,7 @@
                 const parodyData = await parodyResponse.json();
                 state.parodyLyrics = parodyData.parodyLyrics;
 
-<<<<<<< Updated upstream
                 document.getElementById('songTitleDisplay').textContent = `🎵 ${parodyData.parodyTitle || state.chosenSong + ' (Math Parody)'}`;
-=======
-                document.getElementById('songTitleDisplay').textContent = `🎵 ${state.chosenSong} (Math Parody)`;
->>>>>>> Stashed changes
                 renderParodyLyrics(state.parodyLyrics);
 
                 // Handle YouTube video embed
@@ -992,7 +980,6 @@
             }
         }
 
-<<<<<<< Updated upstream
         // Track which lyrics view is active: 'parody' or 'original'
         let currentLyricsView = 'parody';
 
@@ -1038,8 +1025,6 @@
             container.insertBefore(hint, container.firstChild);
         }
 
-=======
->>>>>>> Stashed changes
         // Render parody lyrics as selectable lines
         function renderParodyLyrics(lyrics) {
             const container = document.getElementById('parodyLyricsDisplay');
@@ -1191,13 +1176,10 @@
             document.getElementById('explainPanel').style.display = 'none';
             document.getElementById('explainResult').style.display = 'none';
             selectedLineIndices = new Set();
-<<<<<<< Updated upstream
             currentLyricsView = 'parody';
             document.getElementById('lyricsSwitch').checked = false;
             document.getElementById('toggleLabelParody').classList.add('active');
             document.getElementById('toggleLabelOriginal').classList.remove('active');
-=======
->>>>>>> Stashed changes
 
             showStep(1);
         }
