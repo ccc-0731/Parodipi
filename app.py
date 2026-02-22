@@ -79,12 +79,7 @@ def generate_topic_checklist(math_concept, level, focus_slider, pdf_context=""):
     Current focus level: {focus_slider}/100
     
     Return ONLY valid JSON in this format (no markdown, no code blocks):
-    {{
-        "topics": [
-            {{"name": "topic_name", "description": "brief description"}},
-            ...
-        ]
-    }}
+    
     """
     
     result = call_gemini_text(prompt)
@@ -121,10 +116,10 @@ def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, c
     """
     
     focus_string = get_focus_prompt(focus_slider)
-    prompt = f"""
-    You are a creative songwriter. Create a parody version of the following song that teaches about {subject}.
+    prompt1 = f"""
+    You are a creative songwriter that demonstrates your reasoning process. Create a parody version of the following song that teaches about {subject}.
     
-    Key concepts to include: {topics_str}
+    Key concepts that you MUST include: {topics_str}
     {pdf_section}
     {focus_string}
     Learning/Teaching focus (0=learning experience, 100=teaching): {focus_slider}/100
@@ -142,12 +137,38 @@ def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, c
     3. Write new lyrics with the SAME meaning structure and EXACT syllable counts.
     4. For every generated line, show syllable breakdown.
     5. Perform a final verification pass and fix mismatches.
+    6. Don't forget to find a title for the final parody song (that is also a parody of the original title).
     
-    Return ONLY the parody lyrics, nothing else.
+    Make sure you clearly indicate which lines are the finalized parody lyrics.
     """
     
-    result = call_gemini_text(prompt)
-    return result['raw']
+    reasoningResult = call_gemini_text(prompt1)
+    print(f"[DEBUG] Parody lyrics reasoning process: {reasoningResult['raw']}")
+
+    prompt2 = f"""You are a formatter that extracts the finalized parody lyrics from the following reasoning process 
+        and returns ONLY the final title and lyrics as valid JSON.
+        
+        Return ONLY valid JSON in this exact format (no markdown, no code blocks, no additional text):
+        {{
+            "title": "Parody Song Title",
+            "lyrics": "Full parody lyrics here, with [Verse 1], [Chorus] for each section."
+        }}
+    """
+    result = call_gemini_text(prompt2 + reasoningResult['raw'])
+    
+    try:
+        # Clean up response if needed
+        text = result['raw'].strip()
+        if text.startswith('```'):
+            text = text.split('\n', 1)[1]
+            if text.endswith('```'):
+                text = text.rsplit('\n', 1)[0]
+        parody_data = json.loads(text)
+        return parody_data
+    except Exception as e:
+        print(f"Error parsing parody JSON: {e}")
+        # Fallback: return raw text as lyrics if JSON parsing fails
+        return {"title": f"{chosen_song} (Math Parody)", "lyrics": result['raw']}
 
 # ============= ROUTES =============
 
@@ -267,9 +288,12 @@ def generate_parody():
     if not math_concept and not pdf_context:
         return jsonify({"error": "Please provide a math concept or PDF context"}), 400
     
-    parody_lyrics = generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, chosen_song, song_lyrics, pdf_context)
+    parody_data = generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, chosen_song, song_lyrics, pdf_context)
     
-    return jsonify({"parodyLyrics": parody_lyrics})
+    return jsonify({
+        "parodyTitle": parody_data.get("title", f"{chosen_song} (Math Parody)"),
+        "parodyLyrics": parody_data.get("lyrics", "")
+    })
 
 @app.route("/api/youtube-search", methods=["GET"])
 def youtube_search():
@@ -469,9 +493,9 @@ Please:
 @app.route("/api/resource-links", methods=["POST"])
 def resource_links():
     """
-    Given selected topics, find 2 trusted learning resource links.
-    Scrapes real YouTube videos from Khan Academy and 3Blue1Brown channels,
-    so every returned URL is guaranteed to be real and clickable.
+    Given selected topics, find up to 3 trusted learning resource videos.
+    Does a single YouTube search for the math concept and picks the best results
+    from a pool of trusted educational channels — guaranteeing relevant content.
     """
     data = request.get_json()
     topics = data.get('topics', [])
@@ -485,62 +509,84 @@ def resource_links():
 
     print(f"[DEBUG] Resource links search: {search_terms}")
 
-    # Sources to search — each is a YouTube channel search
-    sources = [
-        {
-            "query": f"Khan Academy {search_terms}",
-            "name": "Khan Academy",
-            "icon": "🎓",
-        },
-        {
-            "query": f"3Blue1Brown {search_terms}",
-            "name": "3Blue1Brown",
-            "icon": "🔵",
-        },
-    ]
+    # Pool of trusted educational math channels
+    trusted_channels = {
+        "khan academy":                 {"name": "Khan Academy",                 "icon": "🎓"},
+        "3blue1brown":                  {"name": "3Blue1Brown",                  "icon": "🔵"},
+        "the organic chemistry tutor":  {"name": "The Organic Chemistry Tutor",  "icon": "🧪"},
+        "patrickjmt":                   {"name": "PatrickJMT",                   "icon": "📐"},
+        "mit opencourseware":           {"name": "MIT OpenCourseWare",           "icon": "🏛️"},
+        "professor leonard":            {"name": "Professor Leonard",            "icon": "👨‍🏫"},
+        "mathologer":                   {"name": "Mathologer",                   "icon": "🔢"},
+        "numberphile":                  {"name": "Numberphile",                  "icon": "🔢"},
+        "eddie woo":                    {"name": "Eddie Woo",                    "icon": "�"},
+        "dr. trefor bazett":            {"name": "Dr. Trefor Bazett",            "icon": "📊"},
+        "blackpenredpen":               {"name": "blackpenredpen",               "icon": "🖊️"},
+    }
 
-    links = []
     headers = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         "Accept-Language": "en-US,en;q=0.9",
     }
 
-    for source in sources:
-        try:
-            search_url = "https://www.youtube.com/results?" + urllib.parse.urlencode({
-                "search_query": source["query"]
-            })
-            resp = http_requests.get(search_url, headers=headers, timeout=8)
-            resp.raise_for_status()
+    links = []
 
-            # Extract video IDs and titles from the YouTube response
-            # Video IDs appear as "videoId":"XXXXXXXXXXX"
-            video_ids = re.findall(r'"videoId":"([a-zA-Z0-9_-]{11})"', resp.text)
+    try:
+        # Single search: let YouTube find the best math videos for this concept
+        search_url = "https://www.youtube.com/results?" + urllib.parse.urlencode({
+            "search_query": f"{search_terms} math explained"
+        })
+        resp = http_requests.get(search_url, headers=headers, timeout=10)
+        resp.raise_for_status()
 
-            # Extract titles — they appear as "title":{"runs":[{"text":"TITLE"}]}
-            titles = re.findall(r'"title":\{"runs":\[\{"text":"([^"]{5,120})"\}', resp.text)
+        # Parse the embedded JSON data from YouTube's HTML
+        json_match = re.search(r'var ytInitialData = ({.*?});</script>', resp.text)
+        if not json_match:
+            print(f"[DEBUG] Could not find ytInitialData JSON")
+            return jsonify({"links": []})
 
-            # Deduplicate video IDs and pair with titles
-            seen = set()
-            for i, vid in enumerate(video_ids):
-                if vid not in seen:
-                    seen.add(vid)
-                    title = titles[i] if i < len(titles) else f"{source['name']} — {search_terms}"
+        yt_data = json.loads(json_match.group(1))
+        contents = (yt_data.get('contents', {})
+                    .get('twoColumnSearchResultsRenderer', {})
+                    .get('primaryContents', {})
+                    .get('sectionListRenderer', {})
+                    .get('contents', [{}])[0]
+                    .get('itemSectionRenderer', {})
+                    .get('contents', []))
+
+        # Walk through results and pick videos from trusted channels (max 1 per channel)
+        found_channels = set()
+        for item in contents:
+            vr = item.get('videoRenderer')
+            if not vr:
+                continue
+
+            vid = vr.get('videoId', '')
+            title = vr.get('title', {}).get('runs', [{}])[0].get('text', '')
+            channel = vr.get('ownerText', {}).get('runs', [{}])[0].get('text', '')
+            channel_lower = channel.lower()
+
+            # Check if this video is from any trusted channel
+            for keyword, info in trusted_channels.items():
+                if keyword in channel_lower and info['name'] not in found_channels:
+                    found_channels.add(info['name'])
                     links.append({
                         "url": f"https://www.youtube.com/watch?v={vid}",
-                        "title": title[:60],
-                        "source": source["name"],
-                        "icon": source["icon"],
+                        "title": title[:80],
+                        "source": info["name"],
+                        "icon": info["icon"],
                     })
-                    break  # one per source
+                    print(f"[DEBUG]   ✅ [{channel}] {title[:60]} ({vid})")
+                    break
 
-        except Exception as e:
-            print(f"[DEBUG] Resource search error for {source['name']}: {e}")
-            continue
+            if len(found_channels) >= 3:
+                break
 
-    print(f"[DEBUG] Found {len(links)} resource links")
+    except Exception as e:
+        print(f"[DEBUG] Resource links search error: {e}")
+
+    print(f"[DEBUG] Found {len(links)} resource links from {len(set(l['source'] for l in links))} sources")
     return jsonify({"links": links})
-
 
 if __name__ == '__main__':
     app.run(port=8000, debug=True)

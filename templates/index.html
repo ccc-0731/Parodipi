@@ -58,81 +58,279 @@
 
         <!-- STEP 2: Topic Selection -->
         <div class="step hidden" id="step2">
-            <h2><span class="step-counter">2</span>Select Topics to Include</h2>
-            
-            <p style="color: #666; margin-bottom: 15px;">Select the concepts you want in your song:</p>
-            <div class="topic-checklist" id="topicChecklist"></div>
+            <div class="step-with-preferences">
+                <!-- Preferences Panel -->
+                <div class="preferences-panel" id="preferencesPanel2">
+                    <div class="preferences-header" onclick="togglePreferencesPanel()">
+                        <span>⚙️ Preferences & Settings</span>
+                        <span class="preferences-toggle collapsed" id="preferenceToggle">▼</span>
+                    </div>
+                    <div class="preferences-content collapsed" id="preferencesContent2">
+                        <!-- Math Concept -->
+                        <div class="preferences-section">
+                            <div class="preferences-section-title">Math Concept</div>
+                            <input type="text" id="mathConceptPref" placeholder="e.g., Eigenvalues, Proof methods...">
+                        </div>
 
-            <div class="custom-topic-input">
-                <input type="text" id="customTopic" placeholder="Add your own topic...">
-                <button onclick="addCustomTopic()">Add Topic</button>
+                        <!-- Level -->
+                        <div class="preferences-section">
+                            <div class="preferences-section-title">Math Level</div>
+                            <select id="levelPref">
+                                <option value="high school">High School</option>
+                                <option value="undergraduate">Undergraduate</option>
+                                <option value="advanced">Advanced/Graduate</option>
+                            </select>
+                        </div>
+
+                        <!-- Experience vs. Teaching Slider -->
+                        <div class="preferences-section">
+                            <div class="preferences-section-title">Focus</div>
+                            <div class="slider-labels">
+                                <span class="hover-note" id="learningJourney2">Learning Journey
+                                    <span class="note-text" id="learningNote2">Song focuses on emotions associated with learning the concept.</span>
+                                </span>
+                                <span class="hover-note" id="teachingFocus2">Teaching Focus
+                                    <span class="note-text" id="teachingNote2">Song focuses on teaching the concepts more directly.</span>
+                                </span>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="focusSliderPref" min="0" max="100" value="50">
+                                <div class="slider-value" id="sliderValuePref">50</div>
+                            </div>
+                        </div>
+
+                        <!-- Topics (shown after generation) -->
+                        <div class="preferences-section" id="topicsPreferencesSection" style="display: none;">
+                            <div class="preferences-section-title">Topics</div>
+                            <div class="topic-checklist" id="topicChecklistPref"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="step-main-content">
+                    <h2><span class="step-counter">2</span>Select Topics to Include</h2>
+                    
+                    <p style="color: #666; margin-bottom: 15px;">Select the concepts you want in your song:</p>
+                    <div class="topic-checklist" id="topicChecklist"></div>
+
+                    <div class="custom-topic-input">
+                        <input type="text" id="customTopic" placeholder="Add your own topic...">
+                        <button onclick="addCustomTopic()">Add Topic</button>
+                    </div>
+
+                    <button onclick="proceedToSongSearch()">Find a Song to Parody</button>
+                    <div id="step2-message"></div>
+                </div>
             </div>
-
-            <button onclick="proceedToSongSearch()">Find a Song to Parody</button>
-            <div id="step2-message"></div>
         </div>
 
         <!-- STEP 3: Song Search -->
         <div class="step hidden" id="step3">
-            <h2><span class="step-counter">3</span>Choose a Song</h2>
-            
-
-            <div class="form-group">
-                <label for="songSearch">Search for a song to parody:</label>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <input type="text" id="songSearch" placeholder="e.g., I want it that way, Try everything, ..." oninput="searchSongs()">
-                    <div class="toggle-switch">
-                        <input type="checkbox" id="modeSwitch" checked onchange="toggleSearchMode()">
-                        <label for="modeSwitch" id="modeSwitchLabel">Title</label>
+            <div class="step-with-preferences">
+                <!-- Preferences Panel -->
+                <div class="preferences-panel" id="preferencesPanel3">
+                    <div class="preferences-header" onclick="togglePreferencesPanel()">
+                        <span>⚙️ Preferences & Settings</span>
+                        <span class="preferences-toggle collapsed" id="preferenceToggle">▼</span>
                     </div>
-                    <button id="randomSongBtn" type="button" style="margin-left: 10px;" onclick="selectRandomSong()">🎲 Random Song</button>
+                    <div class="preferences-content collapsed" id="preferencesContent3">
+                        <!-- Math Concept -->
+                        <div class="preferences-section">
+                            <div class="preferences-section-title">Math Concept</div>
+                            <input type="text" id="mathConceptPref3" placeholder="e.g., Eigenvalues, Proof methods...">
+                        </div>
+
+                        <!-- Level -->
+                        <div class="preferences-section">
+                            <div class="preferences-section-title">Math Level</div>
+                            <select id="levelPref3">
+                                <option value="high school">High School</option>
+                                <option value="undergraduate">Undergraduate</option>
+                                <option value="advanced">Advanced/Graduate</option>
+                            </select>
+                        </div>
+
+                        <!-- Experience vs. Teaching Slider -->
+                        <div class="preferences-section">
+                            <div class="preferences-section-title">Focus</div>
+                            <div class="slider-labels">
+                                <span class="hover-note" id="learningJourney3">Learning Journey
+                                    <span class="note-text" id="learningNote3">Song focuses on emotions associated with learning the concept.</span>
+                                </span>
+                                <span class="hover-note" id="teachingFocus3">Teaching Focus
+                                    <span class="note-text" id="teachingNote3">Song focuses on teaching the concepts more directly.</span>
+                                </span>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="focusSliderPref3" min="0" max="100" value="50">
+                                <div class="slider-value" id="sliderValuePref3">50</div>
+                            </div>
+                        </div>
+
+                        <!-- Topics -->
+                        <div class="preferences-section" id="topicsPreferencesSection3" style="display: none;">
+                            <div class="preferences-section-title">Topics</div>
+                            <div class="topic-checklist" id="topicChecklistPref3"></div>
+                        </div>
+
+                        <!-- Selected Song -->
+                        <div class="preferences-section" id="selectedSongPreferencesSection" style="display: none;">
+                            <div class="preferences-section-title">Current Song</div>
+                            <div id="selectedSongPref" style="padding: 8px; background: #fff8e1; border-radius: 6px; font-size: 0.9em; color: #333;"></div>
+                            <button onclick="showSongSearchInPreferences()" style="width: 100%; margin-top: 10px; padding: 8px 12px; font-size: 0.85em;">Change Song</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="step-main-content">
+                    <h2><span class="step-counter">3</span>Choose a Song</h2>
+                    
+                    <div class="form-group">
+                        <label for="songSearch">Search for a song to parody:</label>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <input type="text" id="songSearch" placeholder="e.g., I want it that way, Try everything, ..." oninput="searchSongs()">
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="modeSwitch" checked onchange="toggleSearchMode()">
+                                <label for="modeSwitch" id="modeSwitchLabel">Title</label>
+                            </div>
+                            <button id="randomSongBtn" type="button" style="margin-left: 10px;" onclick="selectRandomSong()">🎲 Random Song</button>
+                        </div>
+                    </div>
+
+                    <div id="searchResults" class="search-results hidden">
+                        <p style="text-align: center; color: #999;">Search results will appear here...</p>
+                    </div>
+
+                    <div id="selectedSongDisplay" style="margin-top: 20px;"></div>
+
+                    <button id="proceedToLyricsBtn" onclick="proceedToLyricsGeneration()" disabled>Generate Parody</button>
+                    <div id="step3-message"></div>
                 </div>
             </div>
-
-            <div id="searchResults" class="search-results hidden">
-                <p style="text-align: center; color: #999;">Search results will appear here...</p>
-            </div>
-
-            <div id="selectedSongDisplay" style="margin-top: 20px;"></div>
-
-            <button id="proceedToLyricsBtn" onclick="proceedToLyricsGeneration()" disabled>Generate Parody</button>
-            <div id="step3-message"></div>
         </div>
 
         <!-- STEP 4: Display Parody Lyrics -->
         <div class="step hidden" id="step4">
-            <h2><span class="step-counter">4</span>Your Math Parody Song</h2>
-            
-            <div id="songTitleDisplay" style="font-size: 1.3em; font-weight: bold; color: #667eea; margin-bottom: 15px;"></div>
-            
-            <div id="originalVideoSection" style="margin-bottom: 20px; display: none;">
-                <h3 style="color: #888; font-size: 0.95em; margin-bottom: 10px;">🎬 Original Song</h3>
-                <div id="videoContainer" style="width: 100%; max-width: 560px; margin: 0 auto;">
-                    <!-- Thumbnail fallback (always works) -->
-                    <div id="videoThumbnail" style="display: none; position: relative; cursor: pointer; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
-                        <img id="videoThumbImg" style="width: 100%; display: block; border-radius: 12px;" alt="Video thumbnail">
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 68px; height: 48px; background: rgba(255,0,0,0.85); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                            <div style="width: 0; height: 0; border-style: solid; border-width: 10px 0 10px 18px; border-color: transparent transparent transparent #fff; margin-left: 3px;"></div>
+            <div class="step-with-preferences">
+                <!-- Preferences Panel -->
+                <div class="preferences-panel" id="preferencesPanel4">
+                    <div class="preferences-header" onclick="togglePreferencesPanel()">
+                        <span>⚙️ Preferences & Settings</span>
+                        <span class="preferences-toggle collapsed" id="preferenceToggle">▼</span>
+                    </div>
+                    <div class="preferences-content collapsed" id="preferencesContent4">
+                        <!-- Math Concept -->
+                        <div class="preferences-section">
+                            <div class="preferences-section-title">Math Concept</div>
+                            <input type="text" id="mathConceptPref4" placeholder="e.g., Eigenvalues, Proof methods...">
+                        </div>
+
+                        <!-- Level -->
+                        <div class="preferences-section">
+                            <div class="preferences-section-title">Math Level</div>
+                            <select id="levelPref4">
+                                <option value="high school">High School</option>
+                                <option value="undergraduate">Undergraduate</option>
+                                <option value="advanced">Advanced/Graduate</option>
+                            </select>
+                        </div>
+
+                        <!-- Experience vs. Teaching Slider -->
+                        <div class="preferences-section">
+                            <div class="preferences-section-title">Focus</div>
+                            <div class="slider-labels">
+                                <span class="hover-note" id="learningJourney4">Learning Journey
+                                    <span class="note-text" id="learningNote4">Song focuses on emotions associated with learning the concept.</span>
+                                </span>
+                                <span class="hover-note" id="teachingFocus4">Teaching Focus
+                                    <span class="note-text" id="teachingNote4">Song focuses on teaching the concepts more directly.</span>
+                                </span>
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="focusSliderPref4" min="0" max="100" value="50">
+                                <div class="slider-value" id="sliderValuePref4">50</div>
+                            </div>
+                        </div>
+
+                        <!-- Topics -->
+                        <div class="preferences-section" id="topicsPreferencesSection4" style="display: none;">
+                            <div class="preferences-section-title">Topics</div>
+                            <div class="topic-checklist" id="topicChecklistPref4"></div>
+                        </div>
+
+                        <!-- Selected Song -->
+                        <div class="preferences-section" id="selectedSongPreferencesSection4" style="display: none;">
+                            <div class="preferences-section-title">Current Song</div>
+                            <div id="selectedSongPref4" style="padding: 8px; background: #fff8e1; border-radius: 6px; font-size: 0.9em; color: #333;"></div>
+                        </div>
+
+                        <!-- Regenerate Button -->
+                        <button onclick="regenerateParody()" style="width: 100%; margin-top: 20px; padding: 12px 16px; font-weight: bold;">🔄 Regenerate Lyrics</button>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="step-main-content">
+                    <h2><span class="step-counter">4</span>Your Math Parody Song</h2>
+                    
+                    <div id="songTitleDisplay" style="font-size: 1.3em; font-weight: bold; color: #667eea; margin-bottom: 15px;"></div>
+                    
+                    <div id="originalVideoSection" style="margin-bottom: 20px; display: none;">
+                        <h3 style="color: #888; font-size: 0.95em; margin-bottom: 10px;">🎬 Original Song</h3>
+                        <div id="videoContainer" style="width: 100%; max-width: 560px; margin: 0 auto;">
+                            <!-- Thumbnail fallback (always works) -->
+                            <div id="videoThumbnail" style="display: none; position: relative; cursor: pointer; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+                                <img id="videoThumbImg" style="width: 100%; display: block; border-radius: 12px;" alt="Video thumbnail">
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 68px; height: 48px; background: rgba(255,0,0,0.85); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                    <div style="width: 0; height: 0; border-style: solid; border-width: 10px 0 10px 18px; border-color: transparent transparent transparent #fff; margin-left: 3px;"></div>
+                                </div>
+                            </div>
+                            <!-- Iframe embed (used when embedding is allowed) -->
+                            <div id="videoIframeWrap" style="display: none; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+                                <iframe id="youtubeEmbed" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
                         </div>
                     </div>
-                    <!-- Iframe embed (used when embedding is allowed) -->
-                    <div id="videoIframeWrap" style="display: none; position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
-                        <iframe id="youtubeEmbed" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 12px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+                    <!-- Audio Player Section -->
+                    <div id="audioPlayerSection" style="margin-bottom: 20px; display: none;">
+                        <h3 style="color: #888; font-size: 0.95em; margin-bottom: 10px;">🎧 Listen to Original</h3>
+                        <div style="width: 100%; max-width: 560px; margin: 0 auto; background: #1a1a2e; border-radius: 12px; padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+                            <div id="audioTitle" style="color: #ccc; font-size: 0.85em; margin-bottom: 10px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
+                            <audio id="audioPlayer" controls style="width: 100%; border-radius: 8px; outline: none;"></audio>
+                        </div>
+                        <div id="audioLoading" style="text-align: center; color: #999; font-size: 0.85em; margin-top: 8px;">Loading audio...</div>
                     </div>
+                    
+                    <!-- Lyrics Toggle + Display -->
+                    <div id="lyricsToggleBar" style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px;">
+                        <span id="toggleLabelParody" class="lyrics-toggle-label active">🎤 Parody Lyrics</span>
+                        <label class="lyrics-toggle">
+                            <input type="checkbox" id="lyricsSwitch" onchange="toggleLyricsView()">
+                            <span class="lyrics-toggle-slider"></span>
+                        </label>
+                        <span id="toggleLabelOriginal" class="lyrics-toggle-label">🎵 Original Lyrics</span>
+                    </div>
+                    <div id="parodyLyricsDisplay" class="lyrics-display"></div>
+
+            <!-- Explain Selected Lines Panel -->
+            <div id="explainPanel" style="display: none; margin-top: 12px; max-width: 100%;">
+                <button id="explainBtn" onclick="explainSelectedLines()" style="margin-bottom: 10px;">🤔 Explain Selected Lines</button>
+                <div id="explainResult" style="display: none; background: #fffbe7; border: 2px solid #e0c97f; border-radius: 10px; padding: 16px 20px; font-size: 0.95em; line-height: 1.7; color: #333; position: relative;">
+                    <button onclick="closeExplanation()" style="position: absolute; top: 8px; right: 12px; background: none; border: none; font-size: 1.2em; cursor: pointer; color: #999; padding: 0; min-width: auto; box-shadow: none;">✕</button>
+                    <div id="explainText"></div>
                 </div>
             </div>
 
-            <!-- Audio Player Section -->
-            <div id="audioPlayerSection" style="margin-bottom: 20px; display: none;">
-                <h3 style="color: #888; font-size: 0.95em; margin-bottom: 10px;">🎧 Listen to Original</h3>
-                <div style="width: 100%; max-width: 560px; margin: 0 auto; background: #1a1a2e; border-radius: 12px; padding: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
-                    <div id="audioTitle" style="color: #ccc; font-size: 0.85em; margin-bottom: 10px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></div>
-                    <audio id="audioPlayer" controls style="width: 100%; border-radius: 8px; outline: none;"></audio>
+            <!-- Related Resources Section -->
+            <div id="resourceLinksSection" style="margin-top: 24px; margin-bottom: 20px; display: none;">
+                <h3 style="color: #888; font-size: 0.95em; margin-bottom: 12px;">📚 Learn More About These Concepts</h3>
+                <div id="resourceLinksContainer" style="display: flex; flex-direction: column; gap: 10px; max-width: 560px; margin: 0 auto;">
                 </div>
-                <div id="audioLoading" style="text-align: center; color: #999; font-size: 0.85em; margin-top: 8px;">Loading audio...</div>
+                <div id="resourceLinksLoading" style="text-align: center; color: #999; font-size: 0.85em; margin-top: 8px;">Finding resources...</div>
             </div>
-            
-            <div id="parodyLyricsDisplay" class="lyrics-display"></div>
 
             <!-- Explain Selected Lines Panel -->
             <div id="explainPanel" style="display: none; margin-top: 12px; max-width: 100%;">
@@ -169,14 +367,193 @@
             songLyrics: '',
             parodyLyrics: '',
             searchMode: 'title', // default mode
-            pdfContext: ''
+            pdfContext: '',
+            preferencesExpanded: false
         };
 
+        // Initialize slider listeners
+        function initSliderListeners() {
+            const slider = document.getElementById('focusSlider');
+            if (slider) {
+                slider.addEventListener('input', (e) => {
+                    document.getElementById('sliderValue').textContent = e.target.value;
+                    state.focusSlider = parseInt(e.target.value);
+                });
+            }
+        }
+
         // Update slider value display
-        document.getElementById('focusSlider').addEventListener('input', (e) => {
-            document.getElementById('sliderValue').textContent = e.target.value;
-            state.focusSlider = parseInt(e.target.value);
-        });
+        initSliderListeners();
+
+        // ===== PREFERENCES PANEL FUNCTIONS =====
+        
+        function togglePreferencesPanel() {
+            state.preferencesExpanded = !state.preferencesExpanded;
+            const currentStep = getCurrentStep();
+            updatePreferencesPanelState(currentStep);
+        }
+
+        function updatePreferencesPanelState(step) {
+            const panelId = `preferencesPanel${step}`;
+            const contentId = `preferencesContent${step}`;
+            const toggleId = `preferenceToggle`;
+            
+            const panel = document.getElementById(panelId);
+            const content = document.getElementById(contentId);
+            const toggle = document.getElementById(toggleId);
+            
+            if (content) {
+                if (state.preferencesExpanded) {
+                    content.classList.remove('collapsed');
+                    toggle.classList.remove('collapsed');
+                } else {
+                    content.classList.add('collapsed');
+                    toggle.classList.add('collapsed');
+                }
+            }
+        }
+
+        function getCurrentStep() {
+            for (let i = 1; i <= 4; i++) {
+                if (!document.getElementById(`step${i}`).classList.contains('hidden')) {
+                    return i;
+                }
+            }
+            return 1;
+        }
+
+        function syncPreferencesValues(step) {
+            // Sync values from state to preferences inputs
+            const mathConceptInput = document.getElementById(`mathConceptPref${step === 1 ? '' : step}`);
+            const levelSelect = document.getElementById(`levelPref${step === 1 ? '' : step}`);
+            const focusSlider = document.getElementById(`focusSliderPref${step === 1 ? '' : step}`);
+            const sliderValue = document.getElementById(`sliderValuePref${step === 1 ? '' : step}`);
+
+            if (mathConceptInput) mathConceptInput.value = state.mathConcept;
+            if (levelSelect) levelSelect.value = state.level;
+            if (focusSlider) {
+                focusSlider.value = state.focusSlider;
+                if (sliderValue) sliderValue.textContent = state.focusSlider;
+            }
+
+            // Add event listeners to sync back to state
+            if (mathConceptInput) {
+                mathConceptInput.addEventListener('input', (e) => {
+                    state.mathConcept = e.target.value;
+                });
+            }
+            if (levelSelect) {
+                levelSelect.addEventListener('change', (e) => {
+                    state.level = e.target.value;
+                });
+            }
+            if (focusSlider) {
+                focusSlider.addEventListener('input', (e) => {
+                    state.focusSlider = parseInt(e.target.value);
+                    if (sliderValue) sliderValue.textContent = e.target.value;
+                });
+            }
+        }
+
+        function renderTopicsInPreferences(step) {
+            const section = document.getElementById(`topicsPreferencesSection${step}`);
+            const container = document.getElementById(`topicChecklistPref${step}`);
+            
+            if (!section || !container) return;
+            
+            section.style.display = 'block';
+            container.innerHTML = '';
+
+            state.topics.forEach((topic, index) => {
+                const div = document.createElement('div');
+                div.className = 'topic-item';
+                const isSelected = state.selectedTopics.some(t => t.name === topic.name);
+                div.innerHTML = `
+                    <input type="checkbox" id="topic-pref-${step}-${index}" ${isSelected ? 'checked' : ''} onchange="updateSelectedTopicsFromPreferences(${step})">
+                    <div class="topic-info">
+                        <label for="topic-pref-${step}-${index}">${topic.name}</label>
+                        <div class="topic-description">${topic.description || ''}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateSelectedTopicsFromPreferences(step) {
+            state.selectedTopics = [];
+            const checkboxes = document.querySelectorAll(`#topicChecklistPref${step} input[type="checkbox"]`);
+            checkboxes.forEach((checkbox, index) => {
+                if (checkbox.checked) {
+                    state.selectedTopics.push(state.topics[index]);
+                }
+            });
+            // Also update main checklist on step 2
+            if (step === 2) {
+                updateSelectedTopics();
+            }
+        }
+
+        function showSelectedSongInPreferences(step) {
+            const section = document.getElementById(`selectedSongPreferencesSection${step}`);
+            const display = document.getElementById(`selectedSongPref${step}`);
+            
+            if (section && display && state.chosenSong) {
+                section.style.display = 'block';
+                display.textContent = `${state.chosenSong}${state.chosenArtist ? ' - ' + state.chosenArtist : ''}`;
+            }
+        }
+
+        function showSongSearchInPreferences() {
+            const searchInput = document.getElementById('songSearch');
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        async function regenerateParody() {
+            const step = getCurrentStep();
+            if (step !== 4) {
+                showMessage('step4-message', 'Cannot regenerate lyrics at this step', 'error');
+                return;
+            }
+
+            if (!state.chosenSong || !state.songLyrics || state.selectedTopics.length === 0) {
+                showMessage('step4-message', 'Missing required information to regenerate', 'error');
+                return;
+            }
+
+            showMessage('step4-message', 'Regenerating lyrics with updated settings...');
+
+            try {
+                const response = await fetch('/api/generate-parody', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        mathConcept: state.mathConcept,
+                        level: state.level,
+                        focusSlider: state.focusSlider,
+                        selectedTopics: state.selectedTopics,
+                        chosenSong: state.chosenSong,
+                        songLyrics: state.songLyrics,
+                        pdfContext: state.pdfContext || ''
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to regenerate parody');
+                }
+
+                const parodyData = await response.json();
+                state.parodyLyrics = parodyData.parodyLyrics;
+                document.getElementById('parodyLyricsDisplay').textContent = state.parodyLyrics;
+                document.getElementById('step4-message').innerHTML = '';
+            } catch (error) {
+                showMessage('step4-message', 'Error regenerating parody: ' + error.message, 'error');
+            }
+        }
+
+        // ===== END PREFERENCES PANEL FUNCTIONS =====
 
         // Step 1: Generate Topics
         async function generateTopics() {
@@ -251,6 +628,12 @@
             });
 
             updateSelectedTopics();
+            
+            // Also render in preferences panel if on step 2 or later
+            const currentStep = getCurrentStep();
+            if (currentStep >= 2) {
+                renderTopicsInPreferences(currentStep);
+            }
         }
 
         // Update selected topics
@@ -261,6 +644,17 @@
                     state.selectedTopics.push(state.topics[index]);
                 }
             });
+            
+            // Also update preferences checklist if on step 2
+            const currentStep = getCurrentStep();
+            if (currentStep === 2) {
+                state.topics.forEach((topic, index) => {
+                    const checkbox = document.getElementById(`topic-pref-2-${index}`);
+                    if (checkbox) {
+                        checkbox.checked = state.selectedTopics.some(t => t.name === topic.name);
+                    }
+                });
+            }
         }
 
         // Add custom topic
@@ -366,6 +760,12 @@
                 `;
                 document.getElementById('proceedToLyricsBtn').disabled = false;
                 document.getElementById('searchResults').classList.add('hidden');
+                
+                // Also show in preferences panel if on step 3
+                const currentStep = getCurrentStep();
+                if (currentStep === 3) {
+                    showSelectedSongInPreferences(3);
+                }
             } catch (error) {
                 showMessage('step3-message', 'Error fetching song lyrics: ' + error.message, 'error');
             }
@@ -428,7 +828,7 @@
                 const parodyData = await parodyResponse.json();
                 state.parodyLyrics = parodyData.parodyLyrics;
 
-                document.getElementById('songTitleDisplay').textContent = `🎵 ${state.chosenSong} (Math Parody)`;
+                document.getElementById('songTitleDisplay').textContent = `🎵 ${parodyData.parodyTitle || state.chosenSong + ' (Math Parody)'}`;
                 renderParodyLyrics(state.parodyLyrics);
 
                 // Handle YouTube video embed
@@ -579,6 +979,51 @@
                 console.log('[Audio] Error:', err);
                 loading.textContent = 'Could not load audio';
             }
+        }
+
+        // Track which lyrics view is active: 'parody' or 'original'
+        let currentLyricsView = 'parody';
+
+        function toggleLyricsView() {
+            const isOriginal = document.getElementById('lyricsSwitch').checked;
+            currentLyricsView = isOriginal ? 'original' : 'parody';
+
+            // Update toggle label styles
+            document.getElementById('toggleLabelParody').classList.toggle('active', !isOriginal);
+            document.getElementById('toggleLabelOriginal').classList.toggle('active', isOriginal);
+
+            // Clear line selections when switching
+            selectedLineIndices = new Set();
+            document.getElementById('explainPanel').style.display = 'none';
+
+            if (isOriginal) {
+                renderOriginalLyrics(state.songLyrics);
+            } else {
+                renderParodyLyrics(state.parodyLyrics);
+            }
+        }
+
+        // Render original lyrics (read-only, no line selection)
+        function renderOriginalLyrics(lyrics) {
+            const container = document.getElementById('parodyLyricsDisplay');
+            container.innerHTML = '';
+            const lines = lyrics.split('\n');
+            lines.forEach((line) => {
+                const lineEl = document.createElement('div');
+                lineEl.className = 'lyric-line lyric-original';
+                if (line.trim() === '') {
+                    lineEl.classList.add('lyric-spacer');
+                    lineEl.innerHTML = '&nbsp;';
+                } else {
+                    lineEl.textContent = line;
+                }
+                container.appendChild(lineEl);
+            });
+            // Add a note at the top
+            const hint = document.createElement('div');
+            hint.className = 'lyrics-hint';
+            hint.textContent = '🎵 Original lyrics — switch back to parody to select lines and get explanations.';
+            container.insertBefore(hint, container.firstChild);
         }
 
         // Render parody lyrics as selectable lines
@@ -732,6 +1177,10 @@
             document.getElementById('explainPanel').style.display = 'none';
             document.getElementById('explainResult').style.display = 'none';
             selectedLineIndices = new Set();
+            currentLyricsView = 'parody';
+            document.getElementById('lyricsSwitch').checked = false;
+            document.getElementById('toggleLabelParody').classList.add('active');
+            document.getElementById('toggleLabelOriginal').classList.remove('active');
 
             showStep(1);
         }
@@ -749,6 +1198,24 @@
                 document.getElementById(`step${i}`).classList.add('hidden');
             }
             document.getElementById(`step${stepNumber}`).classList.remove('hidden');
+            
+            // Initialize preferences panel for steps 2-4
+            if (stepNumber >= 2 && stepNumber <= 4) {
+                syncPreferencesValues(stepNumber);
+                
+                // Show topics in preferences if they exist
+                if (stepNumber >= 2 && state.topics.length > 0) {
+                    renderTopicsInPreferences(stepNumber);
+                }
+                
+                // Show song in preferences if on step 3 or 4
+                if ((stepNumber === 3 || stepNumber === 4) && state.chosenSong) {
+                    showSelectedSongInPreferences(stepNumber);
+                }
+                
+                // Ensure preferences panel is collapsed by default
+                updatePreferencesPanelState(stepNumber);
+            }
         }
 
         function showMessage(elementId, message, type = 'info') {
