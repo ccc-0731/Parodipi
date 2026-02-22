@@ -391,6 +391,7 @@
             chosenSong: '',
             chosenArtist: '',
             songLyrics: '',
+            originalSongLyrics: '',
             parodyLyrics: '',
             searchMode: 'title', // default mode
             pdfContext: '',
@@ -778,6 +779,7 @@
                 const response = await fetch(`/api/get-song-lyrics?title=${encodeURIComponent(title)}`);
                 const data = await response.json();
                 state.songLyrics = data.lyrics;
+                state.originalSongLyrics = data.originalLyrics;
                 const display = document.getElementById('selectedSongDisplay');
                 display.innerHTML = `
                     <div class="success">
@@ -1023,7 +1025,7 @@
             document.getElementById('explainPanel').style.display = 'none';
 
             if (isOriginal) {
-                renderOriginalLyrics(state.songLyrics);
+                renderOriginalLyrics(state.originalSongLyrics);
             } else {
                 renderParodyLyrics(state.parodyLyrics);
             }
@@ -1177,6 +1179,7 @@
                 chosenSong: '',
                 chosenArtist: '',
                 songLyrics: '',
+                originalSongLyrics: '',
                 parodyLyrics: '',
                 pdfContext: ''
             };
@@ -1278,7 +1281,7 @@
                         artist: state.chosenArtist,
                         parodyTitle: document.getElementById('songTitleDisplay')?.textContent || '',
                         parodyLyrics: state.parodyLyrics,
-                        originalLyrics: state.songLyrics
+                        originalLyrics: state.originalSongLyrics
                     })
                 });
                 const data = await resp.json();

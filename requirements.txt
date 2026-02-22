@@ -9,3 +9,4 @@ textstat
 yt_dlp
 beautifulsoup4
 gunicorn
+textstat

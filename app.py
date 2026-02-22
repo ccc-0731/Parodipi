@@ -5,7 +5,7 @@ import re
 import urllib.parse
 import requests as http_requests
 from gemini_call import call_gemini_text
-from song_database import search_songs, get_song_lyrics, get_random_song
+from song_database import search_songs, get_song_lyrics, get_song_lyrics_with_syllable_count, get_random_song
 from user_database import create_user, authenticate_user, create_guest_user, save_parody, get_user_parodies, delete_parody
 
 # Import focus mapping function
@@ -141,12 +141,12 @@ def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, c
 
     Process:
 
-    1. For each original line, compute syllable count.
-    2. Store the counts.
+    1. Reference the syllable counts after each line.
+    2. Make sure that the repeated sections maintain the exact same structure throughout the song(e.g. Every "I want it that way" in the song is parodized into -> "You prove it this way")
     3. Write new lyrics with the SAME meaning structure and EXACT syllable counts.
-    !!! Make sure that you spell out mathematical symbols how a person would actually say them (e.g. "minus", "partial", "square root/root")
+    !!! Make sure that you spell out mathematical symbols how a person would actually say them (e.g. "minus", "partial", "square root/root", "transpose")
     4. For every generated line, show syllable breakdown.
-    5. Perform a final verification pass and fix mismatches.
+    5. Perform a verification pass and fix syllable count mismatches.
     6. Don't forget to find a title for the final parody song (that is also a parody of the original title).
     
     Make sure you clearly indicate which lines are the finalized parody lyrics.
@@ -156,12 +156,12 @@ def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, c
     print(f"[DEBUG] Parody lyrics reasoning process: {reasoningResult['raw']}")
 
     prompt2 = f"""You are a formatter that extracts the finalized parody lyrics from the following reasoning process 
-        and returns ONLY the final title and lyrics as valid JSON.
+        and returns ONLY the final title and complete parody song lyrics as valid JSON.
         
         Return ONLY valid JSON in this exact format (no markdown, no code blocks, no additional text):
         {{
             "title": "Parody Song Title",
-            "lyrics": "Full parody lyrics here, with [Verse 1], [Chorus] for each section."
+            "lyrics": "Full parody lyrics here, with [Verse n], [Chorus] for each section."
         }}
     """
     result = call_gemini_text(prompt2 + reasoningResult['raw'])
@@ -374,12 +374,13 @@ def get_song():
     if not song_title:
         return jsonify({"error": "Song title is required"}), 400
     
-    lyrics = get_song_lyrics(song_title)
+    lyrics_with_counts = get_song_lyrics_with_syllable_count(song_title)
+    original_lyrics = get_song_lyrics(song_title)
     
-    if not lyrics:
+    if not lyrics_with_counts or not original_lyrics:
         return jsonify({"error": "Song not found"}), 404
     
-    return jsonify({"title": song_title, "lyrics": lyrics})
+    return jsonify({"title": song_title, "lyrics": lyrics_with_counts, "originalLyrics": original_lyrics})
 
 @app.route("/api/generate-parody", methods=["POST"])
 def generate_parody():

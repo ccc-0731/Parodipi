@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import textstat
 
 def load_songs_from_csv(file_path):
     # Load songs from a CSV file into a pandas dataframe.
@@ -11,6 +12,14 @@ def load_songs_from_csv(file_path):
         print(f"Error loading songs from CSV: {e}")
         return []
     
+def count_syllables(text):
+    # Use textstat to count syllables in the given text.
+    try:
+        return textstat.syllable_count(text)
+    except Exception as e:
+        print(f"Error counting syllables: {e}")
+        return 0
+
 def clean_song_lyrics(df):
     # Preprocessing: Remove parts in "lyrics" before "Read More"
     def clean_lyrics(lyrics):
@@ -20,7 +29,18 @@ def clean_song_lyrics(df):
             return lyrics.split("Read More", 1)[1].strip()
         return lyrics.strip()
     
+    def add_syllable_counts_per_line(lyrics):
+        if not lyrics:
+            return lyrics
+        lines = lyrics.split('\n')
+        lines_with_counts = [
+            f"{line} [Syllable Count: {count_syllables(line)}]" if '[' not in line else line
+            for line in lines
+        ]
+        return '\n'.join(lines_with_counts)
+    
     df['lyrics'] = df['lyrics'].apply(clean_lyrics)
+    df['lyrics_with_syllable_count'] = df['lyrics'].apply(add_syllable_counts_per_line)
     return df
 
 def search_songs(query, mode='title'):
@@ -34,6 +54,13 @@ def search_songs(query, mode='title'):
     return [
         {"title": row['song'], "artist": row['artist']} for _, row in results.iterrows()
     ]
+def get_song_lyrics_with_syllable_count(song_title):
+    if not isinstance(song_title, str) or songs_df is None or songs_df.empty:
+        return None
+    song_row = songs_df[songs_df['song'].str.lower() == song_title.lower()]
+    if not song_row.empty:
+        return song_row.iloc[0]['lyrics_with_syllable_count']
+    return None
 
 def get_song_lyrics(song_title):
     if not isinstance(song_title, str) or songs_df is None or songs_df.empty:
@@ -61,4 +88,5 @@ if __name__ == '__main__':
     clean_song_lyrics(songs_df)
 
 
-    print(songs_df.head())
+    print(songs_df.tail())
+    print(get_song_lyrics_with_syllable_count("I want it that way"))
