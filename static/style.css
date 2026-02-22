@@ -2,7 +2,9 @@
 .hover-note {
     position: relative;
     cursor: pointer;
+    font-family: Verdana, Geneva, sans-serif;
 }
+
 .note-text {
     display: none;
     position: absolute;
@@ -110,7 +112,7 @@
 /* Math Parody Song Generator Theme: Sky Blue, Sea Green, Sandy Yellow */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #87ceeb 0%, #20b2aa 60%, #fff8e1 100%); /* sky blue, sea green, sandy yellow */
+    background: linear-gradient(135deg, #87ceeb 0%, #20b2aa 60%, #fff8e1 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -118,22 +120,17 @@ body {
     padding: 20px;
 }
 
-.container {
-    background: #fff8e1; /* sandy creamy yellow */
-    border-radius: 15px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    max-width: 900px;
-    width: 100%;
-    padding: 40px;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-
 h1 {
-    color: #20b2aa; /* sea green */
-    margin-bottom: 30px;
+    color: #20b2aa;
     text-align: center;
     font-size: 2.5em;
+
+    background: white;
+    padding: 40px 25px;   /* ↑ increase top & bottom padding */
+    border-radius: 10px 10px 0 0;  /* flat bottom edge */
+    margin: 0;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
 }
 
 h2 {
@@ -141,14 +138,14 @@ h2 {
     margin-top: 30px;
     margin-bottom: 15px;
     font-size: 1.5em;
+    font-family: Cambria, Georgia, serif;
 }
 
 .step {
     margin-bottom: 40px;
     padding: 20px;
     background: #e3f6f5; /* light sky blue/sea green mix */
-    border-radius: 10px;
-    border-left: 5px solid #87ceeb;
+    border-radius: 0 0 10px 10px;
 }
 
 .step.hidden {
@@ -175,9 +172,12 @@ select {
     border-radius: 8px;
     font-size: 1em;
     transition: border-color 0.3s;
+
+    box-sizing: border-box;   /* ← ADD THIS */
 }
 
 input[type="text"]:focus,
+
 input[type="number"]:focus,
 select:focus {
     outline: none;
@@ -261,6 +261,10 @@ button:disabled {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 15px;
     margin: 20px 0;
+
+    max-height: 350px;   /* adjust height if needed */
+    overflow-y: auto;    /* enables scrolling */
+    padding-right: 8px;  /* prevents scrollbar overlap */
 }
 
 .topic-item {
@@ -351,7 +355,7 @@ button:disabled {
     border-radius: 8px;
     padding: 20px;
     white-space: pre-wrap;
-    font-family: 'Courier New', monospace;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
     line-height: 1.8;
     max-height: 400px;
     overflow-y: auto;
