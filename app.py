@@ -79,7 +79,14 @@ def generate_topic_checklist(math_concept, level, focus_slider, pdf_context=""):
     Current focus level: {focus_slider}/100
     
     Return ONLY valid JSON in this format (no markdown, no code blocks):
+    {{
+        "topics": [
+            {{"name": "Topic Name", "description": "Brief description of the topic"}},
+            {{"name": "Another Topic", "description": "Brief description"}}
+        ]
+    }}
     
+    Return 5-8 topics. Each topic should be a specific sub-concept or key term.
     """
     
     result = call_gemini_text(prompt)

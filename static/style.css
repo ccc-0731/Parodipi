@@ -135,12 +135,27 @@ h1 {
     text-align: center;
     font-size: 2.5em;
 
-    background: white;
-    padding: 40px 25px;   /* ↑ increase top & bottom padding */
-    border-radius: 10px 10px 0 0;  /* flat bottom edge */
-    margin: 0;
+    /* layout */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 
+    /* spacing */
+    margin: 0;
+    margin-bottom: 30px;
+    padding: 40px 25px;
+
+    /* styling */
+    background: white;
+    border-radius: 10px 10px 0 0;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+.header-logo {
+    height: 70px;
+    width: auto;
+    object-fit: contain;
 }
 
 h2 {
