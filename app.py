@@ -142,6 +142,7 @@ def generate_parody_lyrics(math_concept, level, focus_slider, selected_topics, c
     1. For each original line, compute syllable count.
     2. Store the counts.
     3. Write new lyrics with the SAME meaning structure and EXACT syllable counts.
+    !!! Make sure that you spell out mathematical symbols how a person would actually say them (e.g. "minus", "partial", "square root/root")
     4. For every generated line, show syllable breakdown.
     5. Perform a final verification pass and fix mismatches.
     6. Don't forget to find a title for the final parody song (that is also a parody of the original title).
