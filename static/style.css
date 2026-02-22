@@ -40,6 +40,11 @@
     text-align: right;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 /* Responsive design for mobile */
 @media (max-width: 600px) {
     .container {
@@ -123,11 +128,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #87ceeb 0%, #20b2aa 60%, #fff8e1 100%);
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    padding: 20px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    margin: 0;
 }
 
 h1 {
@@ -174,8 +175,10 @@ h2 {
 .step {
     margin-bottom: 40px;
     padding: 20px;
-    background: #cfeeff; /* light blue */
+
+    background: #e6f7ff;   /* ← ADD THIS */
     border-radius: 0 0 10px 10px;
+    border-top: 4px solid #20b2aa;
 }
 
 .step.hidden {
