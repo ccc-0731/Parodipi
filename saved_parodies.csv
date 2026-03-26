@@ -1965,3 +1965,283 @@ I want it that way
 
 [Outro: AJ]
 'Cause I want it that way",2026-03-04T00:11:59.176850
+8d9f3990,9746af46,"package implement;  import java.util.ArrayList; import java.util.HashSet; import java.util.Iterator; import java.util.List; import java.util.NoSuchElementException; import java.util.Set;  /**  * Your implementation of a Linear Probing HashMap. Must implement {@link Iterable}.  */ public class HashMap<K, V> implements Iterable<K> {       /**      * The initial capacity of the LinearProbingHashMap when created with the      * default constructor.      *      * DO NOT MODIFY THIS VARIABLE!      */     public static final int INITIAL_CAPACITY = 13;      /**      * The max load factor of the LinearProbingHashMap      *      * DO NOT MODIFY THIS VARIABLE!      */     public static final double MAX_LOAD_FACTOR = 0.67;      private MapEntry<K, V>[] table;     private int size;      /**      * Constructs a new Linear Probing HashMap.      *      * The backing array should have an initial capacity of {@code INITIAL_CAPACITY}.      *      * Use constructor chaining.      */     public HashMap() {         this(INITIAL_CAPACITY);     }      /**      * Constructs a new LinearProbingHashMap.      *      * The backing array should have an initial capacity of initialCapacity.      *      * You may assume initialCapacity will always be positive.      *      * @param initialCapacity the initial capacity of the backing array      */     public HashMap(int initialCapacity) {         table = (MapEntry<K, V>[]) new MapEntry[initialCapacity];         size = 0;     }      /**      * Adds the given key-value pair to the map. If an entry in the map      * already has this key, replace the entry's value with the new one      * passed in.      *      * In the case of a collision, use linear probing as your resolution      * strategy. See the PDF for more instructions on edge cases and resizing.      *      * If a value was updated, return the old value; otherwise, return null.      *      * @param key   the key to add      * @param value the value to add      * @return null if the key was not already in the map. If it was in the      * map, return the old value associated with it      * @throws IllegalArgumentException if key or value is null      */     public V put(K key, V value) {         if (key == null || value == null) {             throw new IllegalArgumentException(""Trying to do null things"");         }         size++;         //Check load factor first         //resize         if (size + 1 > table.length * MAX_LOAD_FACTOR) {             resizeBackingTable(table.length * 2 + 1);             return put(key, value);             //newtable.put. Note efficiency. Stop when reached size.         } else {             //don't need to resize             //check numSeen first             int numSeen = 0;             int firstDel = -1;             int index = Math.abs(key.hashCode() % table.length);             if (table[index] == null) {                 //Awesome! Just put it there.                 table[index] = new MapEntry<K, V>(key, value);                 return null;             }             //if you see a del with the same index: just add there.             while (table[index] != null && numSeen < size) { //iterate until hit null                 if (table[index].getValue().equals(key)) { //<key,value> already exists or del with same index                     V oldValue = table[index].getValue(); //just add to the del with same index                     table[index] = new MapEntry<K, V>(key, value);                     return oldValue;                 }                 if (firstDel == -1 && table[index].isRemoved()) { //if hit first non-key del                     firstDel = index;                 }                 index++;                 numSeen++;             }             //Didn't find key.             if (firstDel != -1) { //there were a del spot earlier                 table[firstDel] = new MapEntry<K, V>(key, value);                 return null;             }             //put in next available spot.             table[index] = new MapEntry<K, V>(key, value);             return null;         }     }      /**      * Removes the entry with a matching key from map by marking the entry as      * removed.      *      * @param key the key to remove      * @return the value previously associated with the key      * @throws IllegalArgumentException if key is null      * @throws NoSuchElementException   if the key is not in the map      */     public V remove(K key) {         //first run get to see if you can find it;         //mark it as del         if (key == null) {             throw new IllegalArgumentException(""Key is null"");         }         int index = Math.abs(key.hashCode() % table.length);         while (table[index] != null) {             //keep looking until get null.             if (table[index].getKey().equals(key)) {                 if (table[index].isRemoved()) {                     throw new NoSuchElementException(""Not in list!"");                 }                 table[index].setRemoved(true);                 size--;                 return table[index].getValue();             }             index++;         }         //not found         throw new NoSuchElementException(""Not in list!"");     }      /**      * Gets the value associated with the given key.      *      * @param key the key to search for in the map      * @return the value associated with the given key      * @throws IllegalArgumentException if key is null      * @throws NoSuchElementException   if the key is not in the map      */     public V get(K key) {         if (key == null) {             throw new IllegalArgumentException(""Key is null"");         }         int index = Math.abs(key.hashCode() % table.length);         while (table[index] != null) {             //keep looking until get null.             if (table[index].getKey().equals(key)) {                 return table[index].getValue();             }             index++;         }         //not found         throw new NoSuchElementException(""Not in list!"");     }      /**      * Gets the value associated with the given key, or returns a provided default value.      *       * @param key the key to search for in the map      * @param defaultValue the value to return if key not found      * @return the value associated with the given key if found,      * {@code defaultValue} otherwise      * @throws IllegalArgumentException if key is null      */     public V getOrDefault(K key, V defaultValue) {         if (key == null) {             throw new IllegalArgumentException(""Key is null"");         }         int index = Math.abs(key.hashCode() % table.length);         while (table[index] != null) {             //keep looking until get null.             if (table[index].getKey().equals(key)) {                 return table[index].getValue();             }             index++;         }         //not found         return defaultValue;     }      /**      * Returns whether or not the key is in the map.      *      * @param key the key to search for in the map      * @return true if the key is contained within the map, false      * otherwise      * @throws IllegalArgumentException if key is null      */     public boolean containsKey(K key) {         if (key == null) {             throw new IllegalArgumentException(""Key is null"");         }         int index = Math.abs(key.hashCode() % table.length);         while (table[index] != null) {             //keep looking until get null.             if (table[index].getKey().equals(key)) {                 return !table[index].isRemoved();             }             index++;         }         //not found         return false;     }      /**      * Returns a Set view of the keys contained in this map.      *      * Use java.util.HashSet.      *      * @return the set of keys in this map      */     public Set<K> keySet() {         HashSet<K> keys = new HashSet<K>();         for (MapEntry<K, V> keySet : table) {             if (keySet != null) {                 keys.add(keySet.getKey());             }         }         return keys;     }      /**      * Returns a List view of the values contained in this map.      *      * Use java.util.ArrayList or java.util.LinkedList.      *      * You should iterate over the table in order of increasing index and add      * entries to the List in the order in which they are traversed.      *      * @return list of values in this map      */     public List<V> values() {         ArrayList<V> values = new ArrayList<V>();         for (MapEntry<K, V> entries : table) {             if (entries != null) {                 values.add(entries.getValue());             }         }         return values;     }      /**      * Resize the backing table to length.      *      * Disregard the load factor for this method. So, if the passed in length is      * smaller than the current capacity, and this new length causes the table's      * load factor to exceed MAX_LOAD_FACTOR, you should still resize the table      * to the specified length.      *      * See the PDF for more details.      *      * @param length new length of the backing table      * @throws IllegalArgumentException if length is less than the      *                                            number of items in the hash      *                                            map      */     public void resizeBackingTable(int length) {         if (length < size) {             throw new IllegalArgumentException(""length is less than num items."");         }         MapEntry<K, V>[] newTable = (MapEntry<K, V>[]) new MapEntry[length];         for (MapEntry<K, V> entry : table) {             if (entry != null) {                 int index = Math.abs(entry.getKey().hashCode() % newTable.length);                 newTable[index] = new MapEntry<K, V>(entry.getKey(), entry.getValue());             }         }         table = newTable;     }      /**      * Clears the map.      *      * Resets the table to a new array of the INITIAL_CAPACITY and resets the      * size.      *      * Must be O(1).      */     public void clear() {         size = 0;         table = (MapEntry<K, V>[]) new MapEntry[INITIAL_CAPACITY];     }      /**      * Returns the table of the map.      *      * For grading purposes only. You shouldn't need to use this method since      * you have direct access to the variable.      *      * @return the table of the map      */     public MapEntry<K, V>[] getTable() {         // DO NOT MODIFY THIS METHOD!         return table;     }      /**      * Returns the size of the map.      *      * For grading purposes only. You shouldn't need to use this method since      * you have direct access to the variable.      *      * @return the size of the map      */     public int size() {         // DO NOT MODIFY THIS METHOD!         return size;     }      /**      * Returns an iterator of all keys in the HashMap. The order should be the      * order they appear in the array from left to right.      * <p>      * Must be done in O(1) auxiliary space.      *      * @return an iterator of all keys in the HashMap      * @implNote you may create a private inner class to implement {@link Iterator}      */     public Iterator<K> iterator() {         return new HashIterator();     }      private class HashIterator implements Iterator<K> {         private int currIndex = -1; //start on -1, since foreach calls hasnext and then next.          /**          * Checks if it has next.          * @return boolean          */         public boolean hasNext() {             if (currIndex >= table.length) {                 return false;             }             for (int i = currIndex + 1; i < table.length; i++) {                 if (table[i] != null && !table[i].isRemoved()) {                     return true;                 }             }             return false;         }          @Override         public K next() {             currIndex++;             while (table[currIndex] == null || table[currIndex].isRemoved()) {                 currIndex++;             }             return table[currIndex].getKey();         }     }      }",undergraduate,"Hashing and Initial Indexing|Linear Probing: Resolving Collisions|Load Factor and the Great Resizing Act|Lazy Deletion with `isRemoved()`|Implementing `Iterable` with a Custom `Iterator`|Edge Cases and Robustness (Nulls, `NoSuchElementException`)|The code doesn't work|All autograder test cases fail|Forget to increment size|Collisions are really annoying|We missed the extra credit deadline|We can not get 15/50 autograder points|I feel like rage-quitting cs",The Sound of Silence,Simon & Garfunkel,🎵 The Hash of Sadness,"[Verse 1]
+Hello, HashMap, my old foe
+My tests are failing, yet again
+A `NullPointerException` was creeping
+Left its seeds while I was sleeping
+And the `hashCode` that was planted in my brain
+Still remains
+Within the hash of sadness
+
+[Verse 2]
+In restless dreams, I debugged alone
+The collision chain, I could not own
+'Neath the logic of linear probing
+I saw linear probing's cold, damp set
+When my mind was stabbed by the flash of a `resize` call
+That split the map
+And touched the hash of sadness
+
+[Verse 3]
+And in the debugger, I just saw
+My autograder points drop, maybe more
+My methods calling, not quite speaking
+My `size` count failing, not quite listening
+My hash table entry `isRemoved` was not declared
+And no one cared
+Disturb the hash of sadness
+
+[Verse 4]
+""`Iterator`,"" said I, ""You don't know""
+My `hasNext` logic, it just grows
+The `No Such Element` will teach
+All nulls thrown, it will outreach you
+But my `MAX_LOAD_FACTOR` just barely fell
+And echoed in my hash map's hell
+
+[Verse 5]
+And the students bowed and prayed
+To autograder points they made
+And the tests screamed out their warning
+Oh, the error messages forming
+And the screen said, ""Extra credit deadline passed, your work just stalls""
+And broken calls
+And whispered, ""Rage quit, CS, I have had it all""","[Verse 1]
+Hello, darkness, my old friend
+I've come to talk with you again
+Because a vision softly creeping
+Left its seeds while I was sleeping
+And the vision that was planted in my brain
+Still remains
+Within the sound of silence
+
+[Verse 2]
+In restless dreams, I walked alone
+Narrow streets of cobblestone
+'Neath the halo of a street lamp
+I turned my collar to the cold and damp
+When my eyes were stabbed by the flash of a neon light
+That split the night
+And touched the sound of silence
+
+[Verse 3]
+And in the naked light, I saw
+Ten thousand people, maybe more
+People talking without speaking
+People hearing without listening
+People writing songs that voices never shared
+And no one dared
+Disturb the sound of silence
+
+
+[Verse 4]
+""Fools,"" said I, ""You do not know
+Silence, like a cancer, grows
+Hear my words that I might teach you
+Take my arms that I might reach you""
+But my words, like silent raindrops, fell
+And echoed in the wells of silence
+
+[Verse 5]
+And the people bowed and prayed
+To the neon god they made
+And the sign flashed out its warning
+In the words that it was forming
+And the sign said, ""The words of the prophets are written on the subway walls
+And tenement halls
+And whispered in the sound of silence""",2026-03-04T00:26:04.174259
+f88c5d99,9746af46,"package implement;  import java.util.ArrayList; import java.util.HashSet; import java.util.Iterator; import java.util.List; import java.util.NoSuchElementException; import java.util.Set;  /**  * Your implementation of a Linear Probing HashMap. Must implement {@link Iterable}.  */ public class HashMap<K, V> implements Iterable<K> {       /**      * The initial capacity of the LinearProbingHashMap when created with the      * default constructor.      *      * DO NOT MODIFY THIS VARIABLE!      */     public static final int INITIAL_CAPACITY = 13;      /**      * The max load factor of the LinearProbingHashMap      *      * DO NOT MODIFY THIS VARIABLE!      */     public static final double MAX_LOAD_FACTOR = 0.67;      private MapEntry<K, V>[] table;     private int size;      /**      * Constructs a new Linear Probing HashMap.      *      * The backing array should have an initial capacity of {@code INITIAL_CAPACITY}.      *      * Use constructor chaining.      */     public HashMap() {         this(INITIAL_CAPACITY);     }      /**      * Constructs a new LinearProbingHashMap.      *      * The backing array should have an initial capacity of initialCapacity.      *      * You may assume initialCapacity will always be positive.      *      * @param initialCapacity the initial capacity of the backing array      */     public HashMap(int initialCapacity) {         table = (MapEntry<K, V>[]) new MapEntry[initialCapacity];         size = 0;     }      /**      * Adds the given key-value pair to the map. If an entry in the map      * already has this key, replace the entry's value with the new one      * passed in.      *      * In the case of a collision, use linear probing as your resolution      * strategy. See the PDF for more instructions on edge cases and resizing.      *      * If a value was updated, return the old value; otherwise, return null.      *      * @param key   the key to add      * @param value the value to add      * @return null if the key was not already in the map. If it was in the      * map, return the old value associated with it      * @throws IllegalArgumentException if key or value is null      */     public V put(K key, V value) {         if (key == null || value == null) {             throw new IllegalArgumentException(""Trying to do null things"");         }         size++;         //Check load factor first         //resize         if (size + 1 > table.length * MAX_LOAD_FACTOR) {             resizeBackingTable(table.length * 2 + 1);             return put(key, value);             //newtable.put. Note efficiency. Stop when reached size.         } else {             //don't need to resize             //check numSeen first             int numSeen = 0;             int firstDel = -1;             int index = Math.abs(key.hashCode() % table.length);             if (table[index] == null) {                 //Awesome! Just put it there.                 table[index] = new MapEntry<K, V>(key, value);                 return null;             }             //if you see a del with the same index: just add there.             while (table[index] != null && numSeen < size) { //iterate until hit null                 if (table[index].getValue().equals(key)) { //<key,value> already exists or del with same index                     V oldValue = table[index].getValue(); //just add to the del with same index                     table[index] = new MapEntry<K, V>(key, value);                     return oldValue;                 }                 if (firstDel == -1 && table[index].isRemoved()) { //if hit first non-key del                     firstDel = index;                 }                 index++;                 numSeen++;             }             //Didn't find key.             if (firstDel != -1) { //there were a del spot earlier                 table[firstDel] = new MapEntry<K, V>(key, value);                 return null;             }             //put in next available spot.             table[index] = new MapEntry<K, V>(key, value);             return null;         }     }      /**      * Removes the entry with a matching key from map by marking the entry as      * removed.      *      * @param key the key to remove      * @return the value previously associated with the key      * @throws IllegalArgumentException if key is null      * @throws NoSuchElementException   if the key is not in the map      */     public V remove(K key) {         //first run get to see if you can find it;         //mark it as del         if (key == null) {             throw new IllegalArgumentException(""Key is null"");         }         int index = Math.abs(key.hashCode() % table.length);         while (table[index] != null) {             //keep looking until get null.             if (table[index].getKey().equals(key)) {                 if (table[index].isRemoved()) {                     throw new NoSuchElementException(""Not in list!"");                 }                 table[index].setRemoved(true);                 size--;                 return table[index].getValue();             }             index++;         }         //not found         throw new NoSuchElementException(""Not in list!"");     }      /**      * Gets the value associated with the given key.      *      * @param key the key to search for in the map      * @return the value associated with the given key      * @throws IllegalArgumentException if key is null      * @throws NoSuchElementException   if the key is not in the map      */     public V get(K key) {         if (key == null) {             throw new IllegalArgumentException(""Key is null"");         }         int index = Math.abs(key.hashCode() % table.length);         while (table[index] != null) {             //keep looking until get null.             if (table[index].getKey().equals(key)) {                 return table[index].getValue();             }             index++;         }         //not found         throw new NoSuchElementException(""Not in list!"");     }      /**      * Gets the value associated with the given key, or returns a provided default value.      *       * @param key the key to search for in the map      * @param defaultValue the value to return if key not found      * @return the value associated with the given key if found,      * {@code defaultValue} otherwise      * @throws IllegalArgumentException if key is null      */     public V getOrDefault(K key, V defaultValue) {         if (key == null) {             throw new IllegalArgumentException(""Key is null"");         }         int index = Math.abs(key.hashCode() % table.length);         while (table[index] != null) {             //keep looking until get null.             if (table[index].getKey().equals(key)) {                 return table[index].getValue();             }             index++;         }         //not found         return defaultValue;     }      /**      * Returns whether or not the key is in the map.      *      * @param key the key to search for in the map      * @return true if the key is contained within the map, false      * otherwise      * @throws IllegalArgumentException if key is null      */     public boolean containsKey(K key) {         if (key == null) {             throw new IllegalArgumentException(""Key is null"");         }         int index = Math.abs(key.hashCode() % table.length);         while (table[index] != null) {             //keep looking until get null.             if (table[index].getKey().equals(key)) {                 return !table[index].isRemoved();             }             index++;         }         //not found         return false;     }      /**      * Returns a Set view of the keys contained in this map.      *      * Use java.util.HashSet.      *      * @return the set of keys in this map      */     public Set<K> keySet() {         HashSet<K> keys = new HashSet<K>();         for (MapEntry<K, V> keySet : table) {             if (keySet != null) {                 keys.add(keySet.getKey());             }         }         return keys;     }      /**      * Returns a List view of the values contained in this map.      *      * Use java.util.ArrayList or java.util.LinkedList.      *      * You should iterate over the table in order of increasing index and add      * entries to the List in the order in which they are traversed.      *      * @return list of values in this map      */     public List<V> values() {         ArrayList<V> values = new ArrayList<V>();         for (MapEntry<K, V> entries : table) {             if (entries != null) {                 values.add(entries.getValue());             }         }         return values;     }      /**      * Resize the backing table to length.      *      * Disregard the load factor for this method. So, if the passed in length is      * smaller than the current capacity, and this new length causes the table's      * load factor to exceed MAX_LOAD_FACTOR, you should still resize the table      * to the specified length.      *      * See the PDF for more details.      *      * @param length new length of the backing table      * @throws IllegalArgumentException if length is less than the      *                                            number of items in the hash      *                                            map      */     public void resizeBackingTable(int length) {         if (length < size) {             throw new IllegalArgumentException(""length is less than num items."");         }         MapEntry<K, V>[] newTable = (MapEntry<K, V>[]) new MapEntry[length];         for (MapEntry<K, V> entry : table) {             if (entry != null) {                 int index = Math.abs(entry.getKey().hashCode() % newTable.length);                 newTable[index] = new MapEntry<K, V>(entry.getKey(), entry.getValue());             }         }         table = newTable;     }      /**      * Clears the map.      *      * Resets the table to a new array of the INITIAL_CAPACITY and resets the      * size.      *      * Must be O(1).      */     public void clear() {         size = 0;         table = (MapEntry<K, V>[]) new MapEntry[INITIAL_CAPACITY];     }      /**      * Returns the table of the map.      *      * For grading purposes only. You shouldn't need to use this method since      * you have direct access to the variable.      *      * @return the table of the map      */     public MapEntry<K, V>[] getTable() {         // DO NOT MODIFY THIS METHOD!         return table;     }      /**      * Returns the size of the map.      *      * For grading purposes only. You shouldn't need to use this method since      * you have direct access to the variable.      *      * @return the size of the map      */     public int size() {         // DO NOT MODIFY THIS METHOD!         return size;     }      /**      * Returns an iterator of all keys in the HashMap. The order should be the      * order they appear in the array from left to right.      * <p>      * Must be done in O(1) auxiliary space.      *      * @return an iterator of all keys in the HashMap      * @implNote you may create a private inner class to implement {@link Iterator}      */     public Iterator<K> iterator() {         return new HashIterator();     }      private class HashIterator implements Iterator<K> {         private int currIndex = -1; //start on -1, since foreach calls hasnext and then next.          /**          * Checks if it has next.          * @return boolean          */         public boolean hasNext() {             if (currIndex >= table.length) {                 return false;             }             for (int i = currIndex + 1; i < table.length; i++) {                 if (table[i] != null && !table[i].isRemoved()) {                     return true;                 }             }             return false;         }          @Override         public K next() {             currIndex++;             while (table[currIndex] == null || table[currIndex].isRemoved()) {                 currIndex++;             }             return table[currIndex].getKey();         }     }      }",undergraduate,"Hashing and Initial Indexing|Linear Probing: Resolving Collisions|Load Factor and the Great Resizing Act|Lazy Deletion with `isRemoved()`|Implementing `Iterable` with a Custom `Iterator`|Edge Cases and Robustness (Nulls, `NoSuchElementException`)|The code doesn't work|All autograder test cases fail|Forget to increment size|Collisions are really annoying|We missed the extra credit deadline|We can not get 15/50 autograder points|I feel like rage-quitting cs",The Sound of Silence,Simon & Garfunkel,🎵 The Hash of Sadness,"[Verse 1]
+Hello, HashMap, my old foe
+My tests are failing, yet again
+A `NullPointerException` was creeping
+Left its seeds while I was sleeping
+And the `hashCode` that was planted in my brain
+Still remains
+Within the hash of sadness
+
+[Verse 2]
+In restless dreams, I debugged alone
+The collision chain, I could not own
+'Neath the logic of linear probing
+I saw linear probing's cold, damp set
+When my mind was stabbed by the flash of a `resize` call
+That split the map
+And touched the hash of sadness
+
+[Verse 3]
+And in the debugger, I just saw
+My autograder points drop, maybe more
+My methods calling, not quite speaking
+My `size` count failing, not quite listening
+My hash table entry `isRemoved` was not declared
+And no one cared
+Disturb the hash of sadness
+
+[Verse 4]
+""`Iterator`,"" said I, ""You don't know""
+My `hasNext` logic, it just grows
+The `No Such Element` will teach
+All nulls thrown, it will outreach you
+But my `MAX_LOAD_FACTOR` just barely fell
+And echoed in my hash map's hell
+
+[Verse 5]
+And the students bowed and prayed
+To autograder points they made
+And the tests screamed out their warning
+Oh, the error messages forming
+And the screen said, ""Extra credit deadline passed, your work just stalls""
+And broken calls
+And whispered, ""Rage quit, CS, I have had it all""","[Verse 1]
+Hello, darkness, my old friend
+I've come to talk with you again
+Because a vision softly creeping
+Left its seeds while I was sleeping
+And the vision that was planted in my brain
+Still remains
+Within the sound of silence
+
+[Verse 2]
+In restless dreams, I walked alone
+Narrow streets of cobblestone
+'Neath the halo of a street lamp
+I turned my collar to the cold and damp
+When my eyes were stabbed by the flash of a neon light
+That split the night
+And touched the sound of silence
+
+[Verse 3]
+And in the naked light, I saw
+Ten thousand people, maybe more
+People talking without speaking
+People hearing without listening
+People writing songs that voices never shared
+And no one dared
+Disturb the sound of silence
+
+
+[Verse 4]
+""Fools,"" said I, ""You do not know
+Silence, like a cancer, grows
+Hear my words that I might teach you
+Take my arms that I might reach you""
+But my words, like silent raindrops, fell
+And echoed in the wells of silence
+
+[Verse 5]
+And the people bowed and prayed
+To the neon god they made
+And the sign flashed out its warning
+In the words that it was forming
+And the sign said, ""The words of the prophets are written on the subway walls
+And tenement halls
+And whispered in the sound of silence""",2026-03-04T00:27:58.076482
+3da661b9,9746af46,"Pull out every concept where the code can go wrong. package refactor;  // ________________________________________________________________________________ // ******************************************************************************** // //  THIS FILE WILL NOT BE TESTED! // //  To have a functioning AVL tree, you must complete the four methods at the //  bottom of this file: update(), leftRotate(), rightRotate(), AND balance(). // //  Read the PDF for more information on how to use this file. // ________________________________________________________________________________ // ********************************************************************************  import java.util.NoSuchElementException;  /**  * A partially completed implementation of an AVL tree.  * <p>  * You should implement the placeholder helper methods to  * complete the functionality of the AVL.  *  * @version 1.0  * @author CS 1332 TAs  * @param <T> the type of data – must be {@link Comparable}  */ @SuppressWarnings(""DuplicatedCode"") public class AVL<T extends Comparable<? super T>> {      private AVLNode<T> root;     private int size;      /**      * Adds the element to the tree.      * <p>      * Start by adding it as a leaf like in a regular BST and then rotate the      * tree as necessary.      * <p>      * If the data is already in the tree, then nothing should be done (the      * duplicate shouldn't get added, and size should not be incremented).      * <p>      * Remember to recalculate heights and balance factors while going back      * up the tree after adding the element, making sure to rebalance if      * necessary.      *      * @param data the data to add      * @throws IllegalArgumentException if data is null      */     public void add(T data) {         if (data == null) {             throw new IllegalArgumentException();         }          root = addH(root, data);     }      /**      * Recursive helper method for add method.      *      * @param curr the root of the current subtree      * @param data the data to add to the tree      * @return the new root of the current subtree      */     private AVLNode<T> addH(AVLNode<T> curr, T data) {         if (curr == null) {             size++;             return new AVLNode<>(data);         }         int comp = data.compareTo(curr.getData());         if (comp > 0) {             curr.setRight(addH(curr.getRight(), data));         } else if (comp < 0) {             curr.setLeft(addH(curr.getLeft(), data));         }          update(curr);         return balance(curr);     }      /**      * Removes and returns the element from the tree matching the given      * parameter.      * <p>      * There are 3 cases to consider:      * 1: The node containing the data is a leaf (no children). In this case,      * simply remove it.      * 2: The node containing the data has one child. In this case, simply      * replace it with its child.      * 3: The node containing the data has 2 children. Use the predecessor to      * replace the data, NOT successor. As a reminder, rotations can occur      * after removing the predecessor node.      * <p>      * Remember to recalculate heights and balance factors while going back      * up the tree after removing the element, making sure to rebalance if      * necessary.      * <p>      * Do not return the same data that was passed in. Return the data that      * was stored in the tree.      *      * @param data the data to remove      * @return the data that was removed      * @throws IllegalArgumentException if data is null      * @throws NoSuchElementException if the data is not found      */     public T remove(T data) {         if (data == null) {             throw new IllegalArgumentException();         }          AVLNode<T> dummy = new AVLNode<>(null);         root = removeH(root, dummy, data);         return dummy.getData();     }      /**      * Recursive helper method for remove method.      *      * @param curr the root of the current subtree      * @param dummy extra node to store removed data      * @param data the data to remove      * @return the new root of the subtree      */     private AVLNode<T> removeH(AVLNode<T> curr, AVLNode<T> dummy, T data) {         if (curr == null) {             throw new NoSuchElementException();         }         int comp = data.compareTo(curr.getData());         if (comp > 0) {             curr.setRight(removeH(curr.getRight(), dummy, data));         } else if (comp < 0) {             curr.setLeft(removeH(curr.getLeft(), dummy, data));         } else {             dummy.setData(curr.getData());             --size;             if (curr.getRight() == null) {                 return curr.getLeft();             } else if (curr.getLeft() == null) {                 return curr.getRight();             } else {                 AVLNode<T> predecessor = new AVLNode<>(null);                 curr.setLeft(removePredecessor(curr.getLeft(), predecessor));                 curr.setData(predecessor.getData());             }         }          update(curr);         return balance(curr);     }      /**      * Recursive helper method for removing the predecessor.      *      * @param curr the root of the current subtree      * @param dummy extra node to store the predecessor      * @return the new root of the subtree      */     private AVLNode<T> removePredecessor(AVLNode<T> curr, AVLNode<T> dummy) {         if (curr.getRight() == null) {             dummy.setData(curr.getData());             return curr.getLeft();         } else {             curr.setRight(removePredecessor(curr.getRight(), dummy));             update(curr);             return balance(curr);         }      }      /**      * Returns the element from the tree matching the given parameter.      * <p>      * Do not return the same data that was passed in. Return the data that      * was stored in the tree.      *      * @param data the data to search for in the tree      * @return the data in the tree equal to the parameter      * @throws IllegalArgumentException if data is null      * @throws NoSuchElementException   if the data is not in the tree      */     public T get(T data) {         if (data == null) {             throw new IllegalArgumentException();         }          AVLNode<T> res = getH(root, data);         if (res == null) {             throw new NoSuchElementException();         }          return res.getData();     }      /**      * Recursive helper method for retrieving the data.      *      * @param curr the root of the current subtree      * @param data the data to find in the tree      * @return the data found in the tree      */     private AVLNode<T> getH(AVLNode<T> curr, T data) {         if (curr == null) {             return null;         }         int comp = data.compareTo(curr.getData());         if (comp > 0) {             return getH(curr.getRight(), data);         } else if (comp < 0) {             return getH(curr.getLeft(), data);         } else {             return curr;         }     }      /**      * Returns whether or not data matching the given parameter is contained      * within the tree.      *      * @param data the data to search for in the tree.      * @return true if the parameter is contained within the tree, false      * otherwise      * @throws IllegalArgumentException if data is null      */     public boolean contains(T data) {         if (data == null) {             throw new IllegalArgumentException();         }         return getH(root, data) != null;     }      /**      * Returns the height of the root of the tree.      *      * @return the height of the root of the tree, -1 if the tree is empty      */     public int height() {         return root == null ? -1 : root.getHeight();     }      /**      * Clears the tree, including all data.      */     public void clear() {         root = null;         size = 0;     }      /**      * Returns the root of the tree.      *      * @return the root of the tree      */     public AVLNode<T> getRoot() {         return root;     }      /**      * Returns the size of the tree.      *      * @return the size of the tree      */     public int size() {         return size;     }      // *** FILL IN THE BELOW HELPER METHODS ***      /**      * Updates a node's height and balance factor, assuming that the node's      * children were both already properly updated.      *      * @param node the node to update (assume non-null)      * @implNote <b>Fill in this method with your code.</b>      */     private void update(AVLNode<T> node) {         node.setHeight(Math.max(node.getRight() == null ? -1 : node.getRight().getHeight(),                 node.getLeft() == null ? -1 : node.getLeft().getHeight()) + 1);         node.setBalanceFactor((node.getLeft() == null ? -1 : node.getLeft().getHeight())                 - (node.getRight() == null ? -1 : node.getRight().getHeight()));     }      /**      * @param node the root of the current subtree (assumed to be unbalanced)      * @return the new root of the balanced subtree      * @implNote <b>Fill in this method with your code.</b>      */     private AVLNode<T> leftRotate(AVLNode<T> node) {         AVLNode<T> nodeOldR = node.getRight(); //store node.right         node.setRight(nodeOldR.getLeft());         nodeOldR.setLeft(node);         update(node);         update(nodeOldR);         return nodeOldR;     }      /**      * @param node the root of the current subtree (assumed to be unbalanced)      * @return the new root of the balanced subtree      * @implNote <b>Fill in this method with your code.</b>      */     private AVLNode<T> rightRotate(AVLNode<T> node) {         AVLNode<T> nodeOldL = node.getLeft();         node.setLeft(nodeOldL.getRight());         nodeOldL.setRight(node);         update(node);         update(nodeOldL);         return nodeOldL;     }      /**      * Checks if the passed in node needs to be balanced and calls      * the relevant rotation operations, if necessary.      *      * @param node the root of the current subtree      * @return the new root of the balanced subtree      * @implNote <b>Fill in this method with your code.</b>      */     private AVLNode<T> balance(AVLNode<T> node) {         int bf = node.getBalanceFactor();         if (bf == 2) { //leaning left, need to do a right rotation             if (node.getLeft().getBalanceFactor() == -1) {                 node.setLeft(leftRotate(node.getLeft()));             }             rightRotate(node);         } else if (bf == -2) { //leaning to the right             if (node.getRight().getBalanceFactor() == 1) {                 node.setRight(rightRotate(node.getRight()));             }             node = leftRotate(node);         }         return node;     } }",undergraduate,Precise Height and Balance Factor Calculation|Flawless Pointer Manipulation in Rotations|Differentiating Single vs. Double Rotations|The Critical Role of Return Values in Recursive Tree Modifications|Handling the Predecessor in Removal with Rebalancing|Robustness for Edge Cases and Null Checks|Failing autograder tests|Can not get 15/50 points before the extra credit deadline|Resort to writing super long ternary operators|Checkstyle is upset|Rotations are confusing,The Last Goodbye,Billy Boyd,🎵 The AVL Goodbye,"[Verse 1]
+I saw my grade drop on the screen
+From Checkstyle, I heard a groan
+As autograder tests killed my well-meant code
+I will try this one last time
+
+[Chorus]
+The night grows darker
+But no passing
+The deadline calls for me
+But my brain needs rest
+Through calling recursions deep
+Where pointer swaps make rotate just fail
+With ternary operators a mile long
+
+[Refrain]
+Beneath the screen's bright eye-sore glow
+Through breakpoints, cold and slow
+I grasp the return value from each rec call
+And though the rotations make my head spin
+I just don't know
+My tree's quite wide now
+And the time has come
+For my dreams to die
+
+[Verse 2]
+Many functions I have seen
+Many null pointer errors screamed
+But I won't give up
+Nor will I forget
+All the TAs who gave some help
+
+[Chorus]
+The night grows darker
+But no passing
+The deadline calls for me
+But my brain needs rest
+Through calling recursions deep
+Where pointer swaps make rotate just fail
+With ternary operators a mile long
+
+[Refrain]
+These failing tests I will hold close
+With your blessing I'll move on
+To master predecessors and balancing pain
+And though my balance factor's still off
+If it's done yet
+My code is so dense
+My submission comes
+To my sleep, farewell
+
+[Outro]
+I bid you all my hardest goodbye, my tree","27 ContributorsThe Last Goodbye LyricsThis is was written for and is played during the credits of The Hobbit: The Battle of the Five Armies and appears on the film’s original motion picture soundtrack.
+
+There is also a music video:[Verse 1]
+I saw the light fade from the sky
+On the wind I heard a sigh
+As the snowflakes cover my fallen brothers
+I will say this last goodbye
+
+[Chorus]
+Night is now falling
+So ends this day
+The road is now calling
+And I must away
+Over hill and under tree
+Through lands where never light has shone
+By silver streams that run down to the sea
+
+[Refrain]
+Under cloud, beneath the stars
+Over snow one winter's morn
+I turn at last to paths that lead home
+And though where the road then takes me
+I cannot tell
+We came all this way
+But now comes the day
+To bid you farewell
+
+[Verse 2]
+Many places I have been
+Many sorrows I have seen
+But I don't regret
+Nor will I forget
+All who took that road with me
+
+
+[Chorus]
+Night is now falling
+So ends this day
+The road is now calling
+And I must away
+Over hill and under tree
+Through lands where never light has shone
+By silver streams that run down to the sea
+
+[Refrain]
+To these memories I will hold
+With your blessing I will go
+To turn at last to paths that lead home
+And though where the road then takes me
+I cannot tell
+We came all this way
+But now comes the day
+To bid you farewell
+
+[Outro]
+I bid you all a very fond farewell",2026-03-04T00:36:39.943229
